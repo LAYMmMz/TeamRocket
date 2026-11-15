@@ -2,8 +2,8 @@
   "project_ref": "ziecxjoeljxoocixejtz",
   "branch": "Database",
   "reference_date": "2026-11-15",
-  "status": "READY_FOR_DEV_REVIEW",
-  "receipt_contract_version": "v1",
+  "status": "HARDENED_READY_FOR_REVIEW",
+  "receipt_contract_version": "v1.1",
   "deployed_rpc": "public.ingest_sync_event",
   "authoritative_vitals_table": "public.health_logs",
   "table_reconciliation": {
@@ -16,16 +16,21 @@
       "public.mission_members",
       "public.astronauts_seed_lookup"
     ],
-    "notes": "57 core domain tables plus 5 sync ledger, audit, unified telemetry ingestion, and mission membership tables."
+    "notes": "57 core domain tables plus 5 sync ledger, audit, unified telemetry ingestion, and fail-closed mission membership tables."
   },
   "migration_file": "supabase/migrations/20261115_02_ingest_sync_event_rpc.sql",
-  "migration_sha256": "<PASTE_SHA256SUM_OUTPUT_HERE>",
-  "rls_and_sqlite_review": {
+  "rollback_file": "supabase/migrations/20261115_02_rollback.sql",
+  "migration_sha256": "af4591dc3f85c57ac34a4977b6cb2e45ae4e681227b05a725d0215804cf3c6ae",
+  "hardening_verifications": {
+    "non_destructive_idempotent_sql": true,
+    "fail_closed_mission_membership": true,
+    "strict_astronaut_lookup_no_uid_fallback": true,
+    "unsupported_event_kinds_rejected": true,
+    "dual_measurement_payload_aliases": true,
+    "persistent_conflict_audit_without_rollback": true,
     "offline_sqlite_preserved": true,
     "anon_direct_table_read_blocked": true,
-    "unauthenticated_rpc_blocked": true,
-    "idempotent_retry_verified": true,
-    "conflict_rejection_verified": true
+    "unauthenticated_rpc_blocked": true
   },
   "reviewer": "Database Team"
 }

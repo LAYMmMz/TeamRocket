@@ -7,4 +7,4 @@ vital_signs,kind=measurement|vital_sign,heart_rate / vitals,health_logs,id / hea
 symptoms,severity,serious,symptom_reports,severity,3,Mapped scale: 1=mild, 2=moderate, 3=serious, 4=severe, 5=critical
 symptoms,severity,severe,symptom_reports,severity,4,Mapped scale: 1=mild, 2=moderate, 3=serious, 4=severe, 5=critical
 symptoms,severity,critical,symptom_reports,severity,5,Mapped scale: 1=mild, 2=moderate, 3=serious, 4=severe, 5=critical
-alert_rules,version,integer (e.g. 1),alert_rules,version,TEXT (e.g. '1'),Backend casts integer version to string; unapproved rules excluded from operational evaluation
+alert_rules,version,integer (e.g. 1),alert_rules,version,TEXT (e.g. '1'),Backend casts integer version to string; unapproved rules excluded from operational evaluationmeasurement_fields,payload.*,metric / value / unit / quality / timestamp,health_logs,heart_rate / original_value / original_unit / quality_status / measured_at,Dual-alias mapping inside ingest_sync_event,Accepts both Dev 1 queue keys and canonical column keys
