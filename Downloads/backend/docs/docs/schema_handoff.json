@@ -1,0 +1,31 @@
+{
+  "project_ref": "ziecxjoeljxoocixejtz",
+  "branch": "Database",
+  "reference_date": "2026-11-15",
+  "status": "READY_FOR_DEV_REVIEW",
+  "receipt_contract_version": "v1",
+  "deployed_rpc": "public.ingest_sync_event",
+  "authoritative_vitals_table": "public.health_logs",
+  "table_reconciliation": {
+    "logical_target_count": 57,
+    "exported_public_table_count": 62,
+    "intentional_additional_tables": [
+      "public.sync_receipts",
+      "public.sync_audit_log",
+      "public.health_logs",
+      "public.mission_members",
+      "public.astronauts_seed_lookup"
+    ],
+    "notes": "57 core domain tables plus 5 sync ledger, audit, unified telemetry ingestion, and mission membership tables."
+  },
+  "migration_file": "supabase/migrations/20261115_02_ingest_sync_event_rpc.sql",
+  "migration_sha256": "<PASTE_SHA256SUM_OUTPUT_HERE>",
+  "rls_and_sqlite_review": {
+    "offline_sqlite_preserved": true,
+    "anon_direct_table_read_blocked": true,
+    "unauthenticated_rpc_blocked": true,
+    "idempotent_retry_verified": true,
+    "conflict_rejection_verified": true
+  },
+  "reviewer": "Database Team"
+}

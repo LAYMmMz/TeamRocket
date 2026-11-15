@@ -1,0 +1,10 @@
+domain,backend_field,backend_value,cloud_table,cloud_column,cloud_value_or_rule,notes
+mission_id,mission_id,DEMO-01,health_logs,mission_id,DEMO-01,Stored directly as TEXT in health_logs and sync_receipts; never cast DEMO-01/DEMO-02 to UUID
+mission_id,mission_id,DEMO-02,health_logs,mission_id,DEMO-02,Supported natively via TEXT mission_id; cross-mission access blocked by RPC/RLS
+astronaut_id,astronaut_id,TEST-CREW-01,astronauts,id,9d5b382b-974d-4d2a-8b68-73f49c1c3ce0,Resolved via lookup on astronauts.crew_code = 'TEST-CREW-01' inside ingest_sync_event
+astronaut_id,astronaut_id,ASTRO-SYNTH-01,astronauts,id,8c4a271a-863c-4c1f-9a57-62e38b0b2bd9,Resolved via lookup on astronauts.crew_code = 'ASTRO-SYNTH-01' inside ingest_sync_event
+vital_signs,kind=measurement|vital_sign,heart_rate / vitals,health_logs,id / heart_rate / normalized_value,Deterministic UUID from md5(kind:record_id),Authoritative destination for offline sync telemetry; no double writes to public.vital_signs
+symptoms,severity,serious,symptom_reports,severity,3,Mapped scale: 1=mild, 2=moderate, 3=serious, 4=severe, 5=critical
+symptoms,severity,severe,symptom_reports,severity,4,Mapped scale: 1=mild, 2=moderate, 3=serious, 4=severe, 5=critical
+symptoms,severity,critical,symptom_reports,severity,5,Mapped scale: 1=mild, 2=moderate, 3=serious, 4=severe, 5=critical
+alert_rules,version,integer (e.g. 1),alert_rules,version,TEXT (e.g. '1'),Backend casts integer version to string; unapproved rules excluded from operational evaluation
