@@ -1,5 +1,58 @@
 CREATE EXTENSION IF NOT EXISTS pgcrypto;
 
+-- 1. Ensure base tables exist (safe if already created)
+CREATE TABLE IF NOT EXISTS public.astronauts (
+    id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+    crew_code TEXT UNIQUE NOT NULL,
+    display_name TEXT NOT NULL,
+    status TEXT NOT NULL DEFAULT 'ACTIVE',
+    created_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
+);
+
+CREATE TABLE IF NOT EXISTS public.health_logs (
+    id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+    astronaut_id UUID NOT NULL REFERENCES public.astronauts(id),
+    mission_id TEXT NOT NULL,
+    source_device_id TEXT,
+    source_type TEXT NOT NULL DEFAULT 'SIMULATED',
+    metric_code TEXT,
+    value NUMERIC,
+    unit TEXT,
+    original_value NUMERIC,
+    original_unit TEXT,
+    normalized_value NUMERIC,
+    normalized_unit TEXT,
+    quality_status TEXT NOT NULL DEFAULT 'Valid',
+    verification_status TEXT NOT NULL DEFAULT 'Pending',
+    heart_rate INTEGER,
+    measured_at TIMESTAMPTZ NOT NULL,
+    received_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+    created_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+    audit_context JSONB NOT NULL DEFAULT '{}'::jsonb
+);
+
+ALTER TABLE public.health_logs
+    ADD COLUMN IF NOT EXISTS mission_id TEXT,
+    ADD COLUMN IF NOT EXISTS source_device_id TEXT,
+    ADD COLUMN IF NOT EXISTS source_type TEXT DEFAULT 'SIMULATED',
+    ADD COLUMN IF NOT EXISTS metric_code TEXT,
+    ADD COLUMN IF NOT EXISTS value NUMERIC,
+    ADD COLUMN IF NOT EXISTS unit TEXT,
+    ADD COLUMN IF NOT EXISTS original_value NUMERIC,
+    ADD COLUMN IF NOT EXISTS original_unit TEXT,
+    ADD COLUMN IF NOT EXISTS normalized_value NUMERIC,
+    ADD COLUMN IF NOT EXISTS normalized_unit TEXT,
+    ADD COLUMN IF NOT EXISTS quality_status TEXT DEFAULT 'Valid',
+    ADD COLUMN IF NOT EXISTS verification_status TEXT DEFAULT 'Pending',
+    ADD COLUMN IF NOT EXISTS heart_rate INTEGER,
+    ADD COLUMN IF NOT EXISTS measured_at TIMESTAMPTZ,
+    ADD COLUMN IF NOT EXISTS received_at TIMESTAMPTZ DEFAULT NOW(),
+    ADD COLUMN IF NOT EXISTS created_at TIMESTAMPTZ DEFAULT NOW(),
+    ADD COLUMN IF NOT EXISTS audit_context JSONB DEFAULT '{}'::jsonb;
+
+CREATE INDEX IF NOT EXISTS idx_health_logs_astronaut_metric_time
+    ON public.health_logs (astronaut_id, metric_code, measured_at DESC);
+
 CREATE TABLE IF NOT EXISTS public.mission_members (
     mission_id TEXT NOT NULL,
     user_id UUID NOT NULL REFERENCES auth.users(id),
@@ -42,10 +95,68 @@ CREATE TABLE IF NOT EXISTS public.sync_audit_log (
     created_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
 );
 
+-- 2. Enable RLS across ALL 5 tables (blocks direct anon table access)
+ALTER TABLE public.astronauts ENABLE ROW LEVEL SECURITY;
+ALTER TABLE public.health_logs ENABLE ROW LEVEL SECURITY;
 ALTER TABLE public.mission_members ENABLE ROW LEVEL SECURITY;
 ALTER TABLE public.sync_receipts ENABLE ROW LEVEL SECURITY;
 ALTER TABLE public.sync_audit_log ENABLE ROW LEVEL SECURITY;
 
+-- Allow authenticated mission members read-only visibility into their own mission data
+DROP POLICY IF EXISTS "mission_members_read_own" ON public.mission_members;
+CREATE POLICY "mission_members_read_own"
+    ON public.mission_members FOR SELECT
+    TO authenticated
+    USING (user_id = auth.uid());
+
+DROP POLICY IF EXISTS "astronauts_read_authenticated_members" ON public.astronauts;
+CREATE POLICY "astronauts_read_authenticated_members"
+    ON public.astronauts FOR SELECT
+    TO authenticated
+    USING (
+        EXISTS (
+            SELECT 1 FROM public.mission_members mm
+            WHERE mm.user_id = auth.uid()
+        )
+    );
+
+DROP POLICY IF EXISTS "health_logs_read_mission_members" ON public.health_logs;
+CREATE POLICY "health_logs_read_mission_members"
+    ON public.health_logs FOR SELECT
+    TO authenticated
+    USING (
+        EXISTS (
+            SELECT 1 FROM public.mission_members mm
+            WHERE mm.mission_id = health_logs.mission_id
+              AND mm.user_id = auth.uid()
+        )
+    );
+
+DROP POLICY IF EXISTS "sync_receipts_read_mission_members" ON public.sync_receipts;
+CREATE POLICY "sync_receipts_read_mission_members"
+    ON public.sync_receipts FOR SELECT
+    TO authenticated
+    USING (
+        EXISTS (
+            SELECT 1 FROM public.mission_members mm
+            WHERE mm.mission_id = sync_receipts.mission_id
+              AND mm.user_id = auth.uid()
+        )
+    );
+
+DROP POLICY IF EXISTS "sync_audit_log_read_mission_members" ON public.sync_audit_log;
+CREATE POLICY "sync_audit_log_read_mission_members"
+    ON public.sync_audit_log FOR SELECT
+    TO authenticated
+    USING (
+        EXISTS (
+            SELECT 1 FROM public.mission_members mm
+            WHERE mm.mission_id = sync_audit_log.mission_id
+              AND mm.user_id = auth.uid()
+        )
+    );
+
+-- 3. Seed synthetic astronauts and verified DEMO-02 auth user
 INSERT INTO public.astronauts (id, crew_code, display_name, status)
 VALUES
     ('8c4a271a-863c-4c1f-9a57-62e38b0b2bd9', 'ASTRO-SYNTH-01', 'Synthetic Test Astronaut 01', 'ACTIVE'),
@@ -56,6 +167,7 @@ INSERT INTO public.mission_members (mission_id, user_id, role)
 VALUES ('DEMO-02', '7828d6d5-0f32-4634-a810-3680a64b6059', 'operator')
 ON CONFLICT (mission_id, user_id) DO NOTHING;
 
+-- 4. RPC Function: stores metric_code + value for ALL supported vitals
 CREATE OR REPLACE FUNCTION public.ingest_sync_event(p_event JSONB)
 RETURNS JSONB
 LANGUAGE plpgsql
@@ -169,8 +281,8 @@ BEGIN
 
     INSERT INTO public.health_logs (
         id, astronaut_id, mission_id, source_device_id, source_type,
-        unit, original_value, original_unit, normalized_value,
-        normalized_unit, quality_status, verification_status,
+        metric_code, value, unit, original_value, original_unit,
+        normalized_value, normalized_unit, quality_status, verification_status,
         heart_rate, measured_at, received_at, created_at, audit_context
     )
     VALUES (
@@ -179,6 +291,8 @@ BEGIN
         v_mission_id,
         v_payload->>'source_device_id',
         COALESCE(v_payload->>'source_type', 'SIMULATED'),
+        v_metric_code,
+        v_norm_val,
         v_norm_unit,
         v_orig_val,
         v_orig_unit,
@@ -186,7 +300,7 @@ BEGIN
         v_norm_unit,
         v_quality,
         COALESCE(v_payload->>'verification_status', 'Pending'),
-        CASE WHEN v_metric_code = 'heart_rate' THEN v_norm_val::INTEGER ELSE NULL END,
+        CASE WHEN v_metric_code = 'heart_rate' THEN ROUND(v_norm_val)::INTEGER ELSE NULL END,
         v_measured_at,
         NOW(),
         NOW(),
