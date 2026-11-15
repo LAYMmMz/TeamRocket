@@ -1,0 +1,24 @@
+.astronaut-stage{background:#020813}
+.astronaut-stage .stage-bottom{display:grid;grid-template-columns:minmax(0,1fr) auto;align-items:end;gap:8px}
+.astronaut-stage .region-selector{display:flex;flex-wrap:wrap;align-items:center;gap:4px;min-width:0}
+.astronaut-stage .region-choice{flex:0 0 auto;min-width:44px;text-align:center;white-space:nowrap}
+.astronaut-stage .stage-controls{display:flex;flex-wrap:nowrap;align-items:center;gap:5px}
+.astronaut-stage .model-load-status{position:absolute;z-index:4;left:50%;top:50%;transform:translate(-50%,-50%);padding:10px 14px;border:1px solid #536a78;background:#08131ddd;color:#bdcbd0;font-size:10px;letter-spacing:.5px;text-align:center;pointer-events:none}
+.astronaut-stage .model-load-status[role=alert]{border-color:#9c624a;color:#f0c39b}
+.astronaut-stage.stage-small .stage-bottom{grid-template-columns:minmax(0,1fr)}
+.astronaut-stage.stage-small .stage-controls{justify-self:end}
+@media(max-width:480px){.astronaut-stage .stage-bottom{grid-template-columns:minmax(0,1fr)}.astronaut-stage .stage-controls{justify-self:end}}
+.explorer-grid>.astronaut-stage{height:auto;aspect-ratio:16 / 9;background:#000}
+.command-hero .hero-content{align-self:stretch;width:100%;height:auto;min-height:680px;aspect-ratio:auto}
+.command-hero .hero-content .astronaut-stage{position:absolute;inset:0;height:auto;aspect-ratio:auto;background:#000}
+.astronaut-stage .region-choice:hover{color:#fff;background:#a72222;border-color:#ff4f4f}
+.command-hero .hero-telemetry>.glass-panel:last-child{flex:0 0 268px}
+.mission-link-panel .panel-title{padding:14px 18px 12px}
+.mission-link-panel .ground-stats{gap:8px;margin:12px}
+.mission-link-panel .stat{padding:10px 11px}
+.mission-link-panel .stat>span{font-size:8px;letter-spacing:.8px}
+.mission-link-panel .stat strong{font-size:clamp(20px,2vw,26px);line-height:1;margin:7px 0 4px;white-space:normal}
+.mission-link-panel .stat-bottom{font-size:8px}
+.mission-link-panel .mini-note{font-size:9px;line-height:1.45;margin:0 12px 12px}
+@media(max-width:950px){.command-hero .hero-content{min-height:530px}.command-hero .hero-telemetry>.glass-panel:last-child{flex:auto}}
+@media(max-width:680px){.command-hero .hero-content{min-height:470px}}

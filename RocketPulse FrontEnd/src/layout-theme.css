@@ -1,0 +1,56 @@
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;600&family=Rajdhani:wght@500;600;700&display=swap');
+
+body {
+  font-family: 'Inter', system-ui, sans-serif;
+}
+
+.app-shell {
+  background:
+    linear-gradient(90deg, rgba(5, 9, 14, .9), rgba(5, 10, 15, .58) 52%, rgba(5, 9, 14, .82)),
+    url('/images/earth-horizon-background.jpg') center / cover fixed no-repeat;
+}
+
+.sidebar,
+.topbar {
+  background-color: rgba(8, 13, 18, .88);
+  -webkit-backdrop-filter: blur(16px);
+  backdrop-filter: blur(16px);
+}
+
+.glass-panel,
+.stat,
+.vital-box {
+  background-color: rgba(12, 21, 28, .76);
+  -webkit-backdrop-filter: blur(14px);
+  backdrop-filter: blur(14px);
+}
+
+h1,
+h2,
+h3,
+.sidebar-brand strong,
+.nav-group-toggle {
+  font-family: 'Rajdhani', 'Arial Narrow', sans-serif;
+}
+
+.stat strong,
+.vital-box strong,
+.data-state strong,
+.stat-bottom {
+  font-family: 'JetBrains Mono', monospace;
+}
+
+.mission-link-panel .stat strong {
+  font-size: clamp(15px, 1.4vw, 18px);
+  white-space: nowrap;
+}
+
+.command-hero {
+  grid-template-columns: minmax(0, 1fr) 320px;
+}
+
+@media (max-width: 950px) {
+  .command-hero {
+    grid-template-columns: minmax(0, 1fr);
+  }
+}
