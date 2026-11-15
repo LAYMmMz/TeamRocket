@@ -53,9 +53,7 @@ VALUES
 ON CONFLICT (id) DO NOTHING;
 
 INSERT INTO public.mission_members (mission_id, user_id, role)
-VALUES
-    ('DEMO-01', '8c4a271a-863c-4c1f-9a57-62e38b0b2bd9', 'operator'),
-    ('DEMO-02', '8c4a271a-863c-4c1f-9a57-62e38b0b2bd9', 'operator')
+VALUES ('DEMO-02', '7828d6d5-0f32-4634-a810-3680a64b6059', 'operator')
 ON CONFLICT (mission_id, user_id) DO NOTHING;
 
 CREATE OR REPLACE FUNCTION public.ingest_sync_event(p_event JSONB)
