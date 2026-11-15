@@ -82,9 +82,9 @@ The source manifest lists 47 features, 57 cloud tables, six offline tables and 1
 
 ## Working with branches
 
-All five existing branches were included in the consolidation. The consolidation commit preserves their starting commits as parents and gives the existing branches one shared layout. Future changes belong in their component folders on feature branches, then into main through reviewed pull requests.
+All five existing branches were included in the consolidation. The consolidation commit preserves their starting commits as parents. This layout is currently on the review branch; main and the original work branches have not been updated. Future changes belong in their component folders on feature branches, then into main through reviewed pull requests.
 
-Historical alternatives are in archive for reference, not automatic deployment. Old PRs proposing the previous layouts are superseded by this consolidation.
+Historical alternatives are in archive for reference, not automatic deployment. Review this consolidation instead of merging the older layout proposals independently.
 
 ## Secrets and generated files
 

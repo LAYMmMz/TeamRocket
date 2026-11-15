@@ -10,7 +10,7 @@
 | frontend/flight-health | `5f1c71ead20faafc5c1cb81826165a4a5ebfcce9` |
 | main | `51384c016e93e44412d280a4fa016a39c6dadafc` |
 
-The consolidation commit has all five source heads as parents. Existing branch names are retained and fast-forwarded to this shared layout; no force push or history deletion is required. Alternative implementations remain under archive and are not activated automatically. PR #1 and PR #2 are superseded by this consolidation.
+The consolidation commit has all five source heads as parents. Existing branches are unchanged. This is a review-branch proposal; applying it to main and aligning the other branch heads is pending approval. No force push or history deletion is proposed. Alternative implementations remain under archive and are not activated automatically. This proposal is intended to supersede the layout proposals in PR #1 and PR #2 after it is accepted.
 
 ## Preserved file mapping
 
