@@ -1,4 +1,5 @@
 import hashlib
+import os  # TEAMROCKET_CLINICAL_OUTBOX_V1
 from typing import Protocol
 import httpx
 from app.core.errors import AppError
@@ -35,7 +36,7 @@ class HTTPReceiptTransport:
         ) as client:
             response = client.post(
                 self.url, json={"p_event": event}, headers=headers
-            )
+            )  # TEAMROCKET_UNIFIED_CLOUD_V2
             response.raise_for_status()
             result = response.json()
         if isinstance(result, list) and len(result) == 1:
@@ -75,6 +76,8 @@ class SyncWorker:
             try:
                 receipt = self.transport.send(event)
                 if not isinstance(receipt, dict) or (
+                    receipt.get("status") not in {"ingested", "duplicate_ok"}
+                    or 
                     receipt.get("event_id") != event["event_id"]
                     or receipt.get("payload_hash")
                     != event["payload_hash"]
@@ -112,6 +115,7 @@ class MemoryReceiptTransport:
                 raise ValueError("Remote event conflict")
             return previous
         receipt = {
+            "status": "ingested",
             "event_id": event["event_id"],
             "payload_hash": event["payload_hash"],
             "receipt_id": hashlib.sha256(canonical([
@@ -120,3 +124,5 @@ class MemoryReceiptTransport:
         }
         self.events[event["event_id"]] = receipt
         return receipt
+
+# TEAMROCKET_UNIFIED_CLOUD_V2: accepts ingested/duplicate_ok only; one RPC endpoint

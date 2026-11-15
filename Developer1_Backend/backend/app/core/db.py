@@ -10,6 +10,7 @@ from sqlalchemy.engine import Engine
 from sqlalchemy.orm import Session, sessionmaker
 
 from app.models.dev2_models import Base
+from app.cloud_completion.outbox import ClinicalCloudOutbox, activate, drain  # TEAMROCKET_CLINICAL_OUTBOX_V1
 
 # Default offline-first SQLite database; overridden by DATABASE_URL (e.g., Supabase Postgres) when set
 DEFAULT_SQLITE_URL = "sqlite:///./data/dev2_clinical.db"
@@ -91,13 +92,18 @@ def init_dev2_db(bind: Optional[Engine] = None) -> None:
 def get_db(request: Request) -> Generator[Session, None, None]:
     """FastAPI dependency injecting a SQLAlchemy Session linked to Dev 1's Store & Settings."""
     db = SessionLocal()
+    activate(db)  # TEAMROCKET_CLINICAL_OUTBOX_V1
     db.info["store"] = getattr(request.app.state, "store", None) or get_shared_store()
     db.info["settings"] = getattr(request.app.state, "settings", None) or _SHARED_SETTINGS
     try:
         yield db
         db.commit()
+        store = db.info.get("store")
+        if store is not None:
+            drain(store, SessionLocal)  # TEAMROCKET_CLINICAL_OUTBOX_V1
     except Exception:
         db.rollback()
         raise
     finally:
         db.close()
+# TEAMROCKET_UNIFIED_CLOUD_V2: unified RPC integration enabled

@@ -244,6 +244,44 @@ def report_symptom(
         payload={"id": symptom.id, "symptom_code": payload.symptom_code, "severity": payload.severity},
         mission_id=payload.mission_id,
     )
+    # TEAMROCKET_DEV2_SYMPTOM_CLOUD_V1
+    # The Dev2 SQLAlchemy queue is local-only. Mirror the supported synthetic
+    # symptom into Dev1's encrypted Store, whose worker uses the cloud RPC.
+    # This does not enable cloud sync for unrelated Dev2 record types.
+    store = db.info.get("store")
+    settings = db.info.get("settings")
+    if (
+        store is not None
+        and settings is not None
+        and settings.environment in {"development", "test"}
+        and payload.is_synthetic
+        and payload.source_type == "SIMULATED"
+    ):
+        cloud_payload = {
+            "event_id": ev_id,
+            "mission_id": payload.mission_id,
+            "astronaut_id": payload.astronaut_id,
+            "symptom_code": payload.symptom_code,
+            "symptom": payload.symptom_code,
+            "severity": payload.severity,
+            "onset_at": payload.onset_at.isoformat(),
+            "body_location": payload.body_location,
+            "measured_at": payload.measured_at.isoformat(),
+            "recorded_at": payload.measured_at.isoformat(),
+            "source_type": payload.source_type,
+            "is_synthetic": True,
+            "quality": "VALID",
+            "verification": "UNVERIFIED",
+            "source_reference": "dev2-synthetic-symptom-api",
+            "source_revision": "v1",
+        }
+        store.put(
+            "symptom", ev_id, cloud_payload,
+            mission_id=payload.mission_id,
+            actor_id=actor.user_id,
+            priority=10,
+        )
+
     return {"id": symptom.id, "event_id": ev_id, "severity": payload.severity, "incident_id": incident_out}
 
 

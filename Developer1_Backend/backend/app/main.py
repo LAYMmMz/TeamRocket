@@ -24,6 +24,11 @@ def create_app(settings=None):
     async def lifespan(app):
         settings.validate()
         app.state.store = Store(settings)
+        # Replay committed Dev2 clinical outbox records after a crash or restart.
+        from app.core.db import init_dev2_db, SessionLocal
+        from app.cloud_completion.outbox import drain as drain_clinical_outbox
+        init_dev2_db()
+        drain_clinical_outbox(app.state.store, SessionLocal)  # TEAMROCKET_CLINICAL_OUTBOX_V1
         app.state.sync_worker = SyncWorker(
             app.state.store,
             HTTPReceiptTransport(settings),
@@ -382,3 +387,5 @@ def create_app(settings=None):
 
 
 app = create_app()
+
+# TEAMROCKET_UNIFIED_CLOUD_V2: unified RPC integration enabled
