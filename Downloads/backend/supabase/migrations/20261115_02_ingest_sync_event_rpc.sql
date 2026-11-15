@@ -159,9 +159,18 @@ CREATE POLICY "sync_audit_log_read_mission_members"
 -- 3. Seed synthetic astronauts and DEMO-02 mission membership (guarded by auth.users existence)
 INSERT INTO public.astronauts (id, crew_code, display_name, status)
 VALUES
-    ('8c4a271a-863c-4c1f-9a57-62e38b0b2bd9', 'ASTRO-SYNTH-01', 'Synthetic Test Astronaut 01', 'ACTIVE'),
-    ('9d5b382b-974d-4d2a-8b68-73f49c1c3ce0', 'TEST-CREW-01', 'Demo Crew Member 01', 'ACTIVE')
-ON CONFLICT (id) DO NOTHING;
+    ('e1a53255-8349-56d0-a1e9-62e328c9b41d', 'CREW-01', 'Synthetic Crew Member 01', 'ACTIVE'),
+    ('807ca81c-d086-535a-badc-61b10d887e12', 'CREW-02', 'Synthetic Crew Member 02', 'ACTIVE'),
+    ('f97876c3-b00f-5140-bb60-38efec5bd9b2', 'CREW-03', 'Synthetic Crew Member 03', 'ACTIVE'),
+    ('668f208b-6e2b-5ee9-b058-acf4c08c9fb6', 'CREW-04', 'Synthetic Crew Member 04', 'ACTIVE')
+ON CONFLICT (crew_code) DO NOTHING;
+
+-- Inside the DO $$ block where v_demo_user_id is resolved:
+INSERT INTO public.mission_members (mission_id, user_id, role)
+VALUES
+    ('DEMO-01', v_demo_user_id, 'operator'),
+    ('DEMO-02', v_demo_user_id, 'operator')
+ON CONFLICT (mission_id, user_id) DO NOTHING;
 
 DO $$
 DECLARE
