@@ -20,7 +20,7 @@
   },
   "migration_file": "supabase/migrations/20261115_02_ingest_sync_event_rpc.sql",
   "rollback_file": "supabase/migrations/20261115_02_rollback.sql",
-  "migration_sha256": "af4591dc3f85c57ac34a4977b6cb2e45ae4e681227b05a725d0215804cf3c6ae",
+  "migration_sha256": "0403e5a2a0c2f9adb880e23b2ecf6af1490919d7b21ab4d7776080709103e257",
   "hardening_verifications": {
     "non_destructive_idempotent_sql": true,
     "fail_closed_mission_membership": true,
