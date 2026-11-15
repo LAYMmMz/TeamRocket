@@ -11,8 +11,8 @@ npm install @supabase/supabase-js
 Create a file named .env.local right in the root of your project directory (make sure it is added to your .gitignore so secrets are never pushed publicly). Add your public credentials provided by the database team:
 
 # Code snippet
-NEXT_PUBLIC_SUPABASE_URL=https://your-project-ref.supabase.co
-NEXT_PUBLIC_SUPABASE_ANON_KEY=your-public-anon-key-here
+NEXT_PUBLIC_SUPABASE_URL=https://ziecxjoeljxoocixejtz.supabase.co
+NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY=sb_publishable_voJTt1u1bJHhGZD6YAbJkA_XHOuPhEP
 
 ⚠️ Important: Never use the service-role/secret key in frontend code! Always use the public anon key, as data access is governed securely by Supabase Row-Level Security (RLS).
 
