@@ -1,0 +1,12 @@
+{
+  "status": "AWAITING_DATABASE_TEAM_HANDOFF",
+  "schema_version": null,
+  "migration_sha256": null,
+  "tables": [],
+  "expected_cloud_table_count": 57,
+  "rls_test_status": "PENDING",
+  "rls_evidence_reference": null,
+  "sqlite_review_status": "PENDING",
+  "receipt_contract_version": null,
+  "reviewed_by": null
+}

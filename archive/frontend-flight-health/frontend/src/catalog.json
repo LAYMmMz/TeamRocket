@@ -1,0 +1,737 @@
+{
+  "tables": [
+    {
+      "name": "astronauts",
+      "fields": ["id", "crew_code", "display_name", "status"]
+    },
+    {
+      "name": "missions",
+      "fields": [
+        "id",
+        "name",
+        "mission_type",
+        "launch_at",
+        "landing_at",
+        "phase"
+      ]
+    },
+    {
+      "name": "mission_crew",
+      "fields": ["mission_id", "astronaut_id", "crew_role"]
+    },
+    {
+      "name": "users",
+      "fields": ["id", "authentication_identity", "account_status"]
+    },
+    {
+      "name": "roles",
+      "fields": ["id", "role_name", "permissions"]
+    },
+    {
+      "name": "user_role_assignments",
+      "fields": ["user_id", "role_id", "mission_id"]
+    },
+    {
+      "name": "devices",
+      "fields": ["id", "device_type", "model", "calibration_status"]
+    },
+    {
+      "name": "device_assignments",
+      "fields": [
+        "device_id",
+        "astronaut_id",
+        "location_id",
+        "assigned_at",
+        "ended_at"
+      ]
+    },
+    {
+      "name": "vital_signs",
+      "fields": [
+        "id",
+        "astronaut_id",
+        "metric_code",
+        "value",
+        "unit",
+        "measured_at",
+        "source_device_id",
+        "quality"
+      ]
+    },
+    {
+      "name": "ecg_records",
+      "fields": [
+        "id",
+        "astronaut_id",
+        "start_at",
+        "end_at",
+        "waveform_reference",
+        "reviewed_interpretation"
+      ]
+    },
+    {
+      "name": "symptom_reports",
+      "fields": [
+        "id",
+        "astronaut_id",
+        "symptom_code",
+        "severity",
+        "onset_at",
+        "reported_at",
+        "body_location"
+      ]
+    },
+    {
+      "name": "health_baselines",
+      "fields": [
+        "id",
+        "astronaut_id",
+        "metric_code",
+        "baseline_value",
+        "measurement_method",
+        "validity"
+      ]
+    },
+    {
+      "name": "medical_findings",
+      "fields": [
+        "id",
+        "astronaut_id",
+        "finding_code",
+        "interpretation",
+        "reviewer_id",
+        "reviewed_at"
+      ]
+    },
+    {
+      "name": "medical_incidents",
+      "fields": [
+        "id",
+        "astronaut_id",
+        "mission_id",
+        "incident_type",
+        "priority",
+        "status"
+      ]
+    },
+    {
+      "name": "incident_events",
+      "fields": ["id", "incident_id", "event_type", "actor_id", "occurred_at"]
+    },
+    {
+      "name": "biological_samples",
+      "fields": [
+        "id",
+        "astronaut_id",
+        "sample_type",
+        "collected_at",
+        "source",
+        "processing_status"
+      ]
+    },
+    {
+      "name": "laboratory_results",
+      "fields": [
+        "id",
+        "sample_id",
+        "test_code",
+        "result_value",
+        "unit",
+        "assay_method",
+        "verification"
+      ]
+    },
+    {
+      "name": "microbial_identifications",
+      "fields": [
+        "id",
+        "sample_id",
+        "organism",
+        "identification_method",
+        "result_status"
+      ]
+    },
+    {
+      "name": "sequencing_runs",
+      "fields": ["id", "sample_id", "platform", "run_quality", "data_reference"]
+    },
+    {
+      "name": "clinical_sample_chain",
+      "fields": [
+        "id",
+        "sample_id",
+        "custody_event",
+        "responsible_person",
+        "occurred_at"
+      ]
+    },
+    {
+      "name": "vascular_ultrasound_results",
+      "fields": [
+        "id",
+        "astronaut_id",
+        "vein",
+        "side",
+        "flow_pattern",
+        "thrombus_finding",
+        "reviewed_by"
+      ]
+    },
+    {
+      "name": "ocular_assessments",
+      "fields": [
+        "id",
+        "astronaut_id",
+        "test_type",
+        "assessed_at",
+        "report_reference"
+      ]
+    },
+    {
+      "name": "ocular_results",
+      "fields": [
+        "id",
+        "assessment_id",
+        "eye",
+        "metric_code",
+        "value",
+        "unit",
+        "interpretation"
+      ]
+    },
+    {
+      "name": "fitness_assessments",
+      "fields": [
+        "id",
+        "astronaut_id",
+        "test_type",
+        "metric_code",
+        "value",
+        "protocol",
+        "assessed_at"
+      ]
+    },
+    {
+      "name": "exercise_sessions",
+      "fields": [
+        "id",
+        "astronaut_id",
+        "exercise_type",
+        "duration",
+        "workload",
+        "repetitions"
+      ]
+    },
+    {
+      "name": "bone_scans",
+      "fields": [
+        "id",
+        "astronaut_id",
+        "scan_type",
+        "scanned_at",
+        "report_reference"
+      ]
+    },
+    {
+      "name": "bone_density_results",
+      "fields": [
+        "id",
+        "scan_id",
+        "bone_region",
+        "bmd_value",
+        "t_score",
+        "z_score"
+      ]
+    },
+    {
+      "name": "functional_assessments",
+      "fields": [
+        "id",
+        "astronaut_id",
+        "test_type",
+        "protocol",
+        "score",
+        "assessed_at"
+      ]
+    },
+    {
+      "name": "personal_dose_records",
+      "fields": [
+        "id",
+        "astronaut_id",
+        "dosimeter_id",
+        "dose_quantity",
+        "value",
+        "unit",
+        "interval"
+      ]
+    },
+    {
+      "name": "radiation_area_records",
+      "fields": [
+        "id",
+        "location_id",
+        "sensor_id",
+        "radiation_metric",
+        "value",
+        "measured_at"
+      ]
+    },
+    {
+      "name": "radiation_events",
+      "fields": ["id", "event_type", "started_at", "ended_at", "status"]
+    },
+    {
+      "name": "environmental_readings",
+      "fields": [
+        "id",
+        "location_id",
+        "metric_code",
+        "value",
+        "unit",
+        "measured_at"
+      ]
+    },
+    {
+      "name": "environmental_samples",
+      "fields": [
+        "id",
+        "sample_type",
+        "location_id",
+        "sample_size",
+        "collected_at"
+      ]
+    },
+    {
+      "name": "environmental_lab_results",
+      "fields": [
+        "id",
+        "sample_id",
+        "test_code",
+        "result_value",
+        "unit",
+        "verification"
+      ]
+    },
+    {
+      "name": "mission_locations",
+      "fields": ["id", "mission_id", "zone_name", "location_type"]
+    },
+    {
+      "name": "gravity_transition_events",
+      "fields": ["id", "mission_id", "from_g", "to_g", "occurred_at"]
+    },
+    {
+      "name": "sleep_sessions",
+      "fields": [
+        "id",
+        "astronaut_id",
+        "start_at",
+        "end_at",
+        "duration",
+        "source"
+      ]
+    },
+    {
+      "name": "behavioral_checkins",
+      "fields": [
+        "id",
+        "astronaut_id",
+        "assessment_type",
+        "score",
+        "visibility_classification"
+      ]
+    },
+    {
+      "name": "nutrition_logs",
+      "fields": ["id", "astronaut_id", "meal_at", "intake_details"]
+    },
+    {
+      "name": "fluid_balance_logs",
+      "fields": [
+        "id",
+        "astronaut_id",
+        "period_start",
+        "period_end",
+        "intake",
+        "output",
+        "unit"
+      ]
+    },
+    {
+      "name": "medication_administrations",
+      "fields": [
+        "id",
+        "astronaut_id",
+        "medication_reference",
+        "dose",
+        "unit",
+        "authorized_by"
+      ]
+    },
+    {
+      "name": "health_alerts",
+      "fields": [
+        "id",
+        "rule_id",
+        "astronaut_id",
+        "location_id",
+        "severity",
+        "status"
+      ]
+    },
+    {
+      "name": "alert_events",
+      "fields": ["id", "alert_id", "event_type", "actor_id", "occurred_at"]
+    },
+    {
+      "name": "alert_evidence",
+      "fields": ["id", "alert_id", "source_record_type", "source_record_id"]
+    },
+    {
+      "name": "alert_rules",
+      "fields": [
+        "id",
+        "version",
+        "condition_definition",
+        "severity",
+        "approval_status"
+      ]
+    },
+    {
+      "name": "medical_exam_schedule",
+      "fields": [
+        "id",
+        "astronaut_id",
+        "exam_type",
+        "due_at",
+        "completion_status"
+      ]
+    },
+    {
+      "name": "medical_procedures",
+      "fields": [
+        "id",
+        "title",
+        "version",
+        "approval_status",
+        "authoritative_source"
+      ]
+    },
+    {
+      "name": "procedure_steps",
+      "fields": [
+        "id",
+        "procedure_id",
+        "step_order",
+        "instruction",
+        "acknowledgment_required"
+      ]
+    },
+    {
+      "name": "medical_inventory",
+      "fields": ["id", "item_code", "quantity", "expiry_at", "storage_location"]
+    },
+    {
+      "name": "clinical_condition_catalog",
+      "fields": ["id", "condition_code", "catalog_version", "description"]
+    },
+    {
+      "name": "recommendation_records",
+      "fields": [
+        "id",
+        "alert_id",
+        "procedure_id",
+        "displayed_at",
+        "action_status"
+      ]
+    },
+    {
+      "name": "data_import_batches",
+      "fields": ["id", "source", "imported_at", "validation_summary"]
+    },
+    {
+      "name": "sync_queue",
+      "fields": [
+        "id",
+        "event_id",
+        "destination",
+        "priority",
+        "status",
+        "attempt_count"
+      ]
+    },
+    {
+      "name": "sync_receipts",
+      "fields": ["id", "event_id", "acknowledged_at", "remote_status"]
+    },
+    {
+      "name": "audit_logs",
+      "fields": [
+        "id",
+        "actor_id",
+        "action",
+        "resource_type",
+        "resource_id",
+        "occurred_at"
+      ]
+    },
+    {
+      "name": "data_quality_issues",
+      "fields": [
+        "id",
+        "record_reference",
+        "issue_type",
+        "severity",
+        "resolution_status"
+      ]
+    },
+    {
+      "name": "attachments",
+      "fields": [
+        "id",
+        "owner_record_reference",
+        "storage_path",
+        "hash",
+        "access_classification"
+      ]
+    }
+  ],
+  "features": [
+    {
+      "id": "F01",
+      "name": "Mission and astronaut management",
+      "phase": "P0"
+    },
+    {
+      "id": "F02",
+      "name": "User roles and clinical data permissions",
+      "phase": "P0"
+    },
+    {
+      "id": "F03",
+      "name": "Device-agnostic sensor and report import",
+      "phase": "P0"
+    },
+    {
+      "id": "F04",
+      "name": "Measurement validation and provenance",
+      "phase": "P0"
+    },
+    {
+      "id": "F05",
+      "name": "Personal health baseline management",
+      "phase": "P0"
+    },
+    {
+      "id": "F06",
+      "name": "Shared symptom reporting",
+      "phase": "P0"
+    },
+    {
+      "id": "F07",
+      "name": "Configurable, versioned clinical alert engine",
+      "phase": "P0"
+    },
+    {
+      "id": "F08",
+      "name": "Central medical incident handling",
+      "phase": "P0"
+    },
+    {
+      "id": "F09",
+      "name": "Approved procedure and recommendation library",
+      "phase": "P0"
+    },
+    {
+      "id": "F10",
+      "name": "Mission-aware examination scheduling",
+      "phase": "P0"
+    },
+    {
+      "id": "F11",
+      "name": "Local storage and offline operation",
+      "phase": "P0"
+    },
+    {
+      "id": "F12",
+      "name": "Ground synchronization and audit history",
+      "phase": "P0"
+    },
+    {
+      "id": "F13",
+      "name": "Cardiovascular vital signs and ECG reporting",
+      "phase": "P1"
+    },
+    {
+      "id": "F14",
+      "name": "Respiratory and oxygenation monitoring",
+      "phase": "P0"
+    },
+    {
+      "id": "F15",
+      "name": "Vascular ultrasound and D-dimer result review",
+      "phase": "P1"
+    },
+    {
+      "id": "F16",
+      "name": "Gravity-adaptation and vestibular assessments",
+      "phase": "P0"
+    },
+    {
+      "id": "F17",
+      "name": "Cognitive and reaction-time assessments",
+      "phase": "P2"
+    },
+    {
+      "id": "F18",
+      "name": "Aerobic fitness and muscle assessments",
+      "phase": "P1"
+    },
+    {
+      "id": "F19",
+      "name": "Exercise and physical workload tracking",
+      "phase": "P0"
+    },
+    {
+      "id": "F20",
+      "name": "Bone-density and recovery examinations",
+      "phase": "P1"
+    },
+    {
+      "id": "F21",
+      "name": "SANS/OCT, visual acuity and fundoscopy",
+      "phase": "P1"
+    },
+    {
+      "id": "F22",
+      "name": "Sleep and circadian monitoring",
+      "phase": "P1"
+    },
+    {
+      "id": "F23",
+      "name": "Nutrition, hydration and fluid balance logs",
+      "phase": "P1"
+    },
+    {
+      "id": "F24",
+      "name": "Behavioral-health check-ins",
+      "phase": "P1"
+    },
+    {
+      "id": "F25",
+      "name": "Personal and area radiation dosimetry",
+      "phase": "P0"
+    },
+    {
+      "id": "F26",
+      "name": "Solar particle event and radiation incident monitoring",
+      "phase": "P0"
+    },
+    {
+      "id": "F27",
+      "name": "Cabin atmosphere and pressure monitoring",
+      "phase": "P0"
+    },
+    {
+      "id": "F28",
+      "name": "Light and noise monitoring",
+      "phase": "P1"
+    },
+    {
+      "id": "F29",
+      "name": "Environmental microbial sampling",
+      "phase": "P1"
+    },
+    {
+      "id": "F30",
+      "name": "Water, air, food and surface test results",
+      "phase": "P0"
+    },
+    {
+      "id": "F31",
+      "name": "Spacesuit microbial hygiene records where available",
+      "phase": "P2"
+    },
+    {
+      "id": "F32",
+      "name": "Blood, saliva, urine and other sample management",
+      "phase": "P1"
+    },
+    {
+      "id": "F33",
+      "name": "Onboard and Earth-laboratory test imports",
+      "phase": "P1"
+    },
+    {
+      "id": "F34",
+      "name": "Immune and viral biomarker result histories",
+      "phase": "P1"
+    },
+    {
+      "id": "F35",
+      "name": "Sequencing and multi-omics dataset records where available",
+      "phase": "P2"
+    },
+    {
+      "id": "F36",
+      "name": "Medical inventory and consumables",
+      "phase": "P1"
+    },
+    {
+      "id": "F37",
+      "name": "Versioned condition-reference catalog",
+      "phase": "P1"
+    },
+    {
+      "id": "F38",
+      "name": "Emergency clinical notification and acknowledgment",
+      "phase": "P0"
+    },
+    {
+      "id": "F39",
+      "name": "Offline crew guidance access",
+      "phase": "P0"
+    },
+    {
+      "id": "F40",
+      "name": "Mission Medical Command dashboard",
+      "phase": "P0"
+    },
+    {
+      "id": "F41",
+      "name": "Individual Astronaut Health dashboard",
+      "phase": "P0"
+    },
+    {
+      "id": "F42",
+      "name": "Clinical Examinations and Recovery dashboard",
+      "phase": "P0"
+    },
+    {
+      "id": "F43",
+      "name": "Radiation and Environment dashboard",
+      "phase": "P0"
+    },
+    {
+      "id": "F44",
+      "name": "Laboratory and Immune Health dashboard",
+      "phase": "P1"
+    },
+    {
+      "id": "F45",
+      "name": "Crew Self-Assessment dashboard",
+      "phase": "P0"
+    },
+    {
+      "id": "F46",
+      "name": "Ground Medical Review dashboard",
+      "phase": "P0"
+    },
+    {
+      "id": "F47",
+      "name": "Synthetic end-to-end mission demonstration",
+      "phase": "P0"
+    }
+  ]
+}

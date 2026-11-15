@@ -1,0 +1,101 @@
+table_name,column_name,data_type,is_nullable,column_default,is_primary_key,references_table,references_column
+access_denial_logs,id,uuid,NO,gen_random_uuid(),YES,null,null
+access_denial_logs,attempted_by_auth_id,text,YES,null,NO,null,null
+access_denial_logs,target_resource,text,NO,null,NO,null,null
+access_denial_logs,reason,text,NO,null,NO,null,null
+access_denial_logs,occurred_at,timestamp with time zone,NO,now(),NO,null,null
+alert_events,id,uuid,NO,gen_random_uuid(),YES,null,null
+alert_events,alert_id,uuid,NO,null,NO,health_alerts,id
+alert_events,event_type,text,NO,null,NO,null,null
+alert_events,actor_id,text,NO,null,NO,null,null
+alert_events,occurred_at,timestamp with time zone,NO,null,NO,null,null
+alert_events,created_at,timestamp with time zone,NO,"timezone('utc'::text, now())",NO,null,null
+alert_evidence,id,uuid,NO,gen_random_uuid(),YES,null,null
+alert_evidence,alert_id,uuid,NO,null,NO,health_alerts,id
+alert_evidence,source_table_name,text,NO,null,NO,null,null
+alert_evidence,source_record_id,uuid,NO,null,NO,null,null
+alert_evidence,created_at,timestamp with time zone,NO,"timezone('utc'::text, now())",NO,null,null
+alert_rules,id,uuid,NO,gen_random_uuid(),YES,null,null
+alert_rules,version,text,NO,null,NO,null,null
+alert_rules,condition_definition,text,NO,null,NO,null,null
+alert_rules,severity,text,NO,null,NO,null,null
+alert_rules,approval_status,text,NO,null,NO,null,null
+alert_rules,created_at,timestamp with time zone,NO,"timezone('utc'::text, now())",NO,null,null
+approved_procedures,id,uuid,NO,gen_random_uuid(),YES,null,null
+approved_procedures,procedure_code,text,NO,null,NO,null,null
+approved_procedures,title,text,NO,null,NO,null,null
+approved_procedures,steps,jsonb,NO,null,NO,null,null
+approved_procedures,approved_by,uuid,YES,null,NO,users,id
+approved_procedures,approved_at,timestamp with time zone,NO,now(),NO,null,null
+astronauts,id,uuid,NO,gen_random_uuid(),YES,null,null
+astronauts,crew_code,text,NO,null,NO,null,null
+astronauts,display_name,text,NO,null,NO,null,null
+astronauts,status,text,NO,'ACTIVE'::text,NO,null,null
+attachments,id,uuid,NO,gen_random_uuid(),YES,null,null
+attachments,owner_record_reference,uuid,NO,null,NO,null,null
+attachments,storage_path,text,NO,null,NO,null,null
+attachments,hash,text,NO,null,NO,null,null
+attachments,access_classification,text,NO,null,NO,null,null
+attachments,created_at,timestamp with time zone,NO,"timezone('utc'::text, now())",NO,null,null
+audit_logs,id,uuid,NO,gen_random_uuid(),YES,null,null
+audit_logs,actor_id,text,NO,null,NO,null,null
+audit_logs,action,text,NO,null,NO,null,null
+audit_logs,resource_type,text,NO,null,NO,null,null
+audit_logs,resource_id,uuid,NO,null,NO,null,null
+audit_logs,occurred_at,timestamp with time zone,NO,null,NO,null,null
+audit_logs,created_at,timestamp with time zone,NO,"timezone('utc'::text, now())",NO,null,null
+behavioral_checkins,id,uuid,NO,gen_random_uuid(),YES,null,null
+behavioral_checkins,astronaut_id,uuid,NO,null,NO,astronauts,id
+behavioral_checkins,assessment_type,text,NO,null,NO,null,null
+behavioral_checkins,score,numeric,NO,null,NO,null,null
+behavioral_checkins,visibility_classification,text,NO,null,NO,null,null
+behavioral_checkins,created_at,timestamp with time zone,NO,"timezone('utc'::text, now())",NO,null,null
+behavioral_health_notes,id,uuid,NO,gen_random_uuid(),YES,null,null
+behavioral_health_notes,astronaut_id,uuid,NO,null,NO,astronauts,id
+behavioral_health_notes,mission_id,uuid,NO,null,NO,missions,id
+behavioral_health_notes,author_id,uuid,NO,null,NO,users,id
+behavioral_health_notes,note_content,text,NO,null,NO,null,null
+behavioral_health_notes,recorded_at,timestamp with time zone,NO,now(),NO,null,null
+behavioral_health_notes,is_synthetic,boolean,NO,false,NO,null,null
+behavioral_health_notes,is_archived,boolean,NO,false,NO,null,null
+biological_samples,id,uuid,NO,gen_random_uuid(),YES,null,null
+biological_samples,astronaut_id,uuid,NO,null,NO,astronauts,id
+biological_samples,sample_type,text,NO,null,NO,null,null
+biological_samples,collected_at,timestamp with time zone,NO,now(),NO,null,null
+biological_samples,source,text,NO,null,NO,null,null
+biological_samples,processing_status,text,NO,'COLLECTED'::text,NO,null,null
+bone_density_results,id,uuid,NO,gen_random_uuid(),YES,null,null
+bone_density_results,scan_id,uuid,NO,null,NO,bone_scans,id
+bone_density_results,bone_region,text,NO,null,NO,null,null
+bone_density_results,bmd_value,numeric,NO,null,NO,null,null
+bone_density_results,t_score,numeric,YES,null,NO,null,null
+bone_density_results,z_score,numeric,YES,null,NO,null,null
+bone_density_results,measurement_method,text,NO,'DXA'::text,NO,null,null
+bone_scans,id,uuid,NO,gen_random_uuid(),YES,null,null
+bone_scans,astronaut_id,uuid,NO,null,NO,astronauts,id
+bone_scans,scan_type,text,NO,null,NO,null,null
+bone_scans,scanned_at,timestamp with time zone,NO,now(),NO,null,null
+bone_scans,report_reference,text,YES,null,NO,null,null
+clinical_condition_catalog,id,uuid,NO,gen_random_uuid(),YES,null,null
+clinical_condition_catalog,condition_code,text,NO,null,NO,null,null
+clinical_condition_catalog,catalog_version,text,NO,null,NO,null,null
+clinical_condition_catalog,description,text,NO,null,NO,null,null
+clinical_condition_catalog,created_at,timestamp with time zone,NO,"timezone('utc'::text, now())",NO,null,null
+clinical_sample_chain,id,uuid,NO,gen_random_uuid(),YES,null,null
+clinical_sample_chain,sample_id,uuid,NO,null,NO,biological_samples,id
+clinical_sample_chain,custody_event,text,NO,null,NO,null,null
+clinical_sample_chain,responsible_person,uuid,YES,null,NO,users,id
+clinical_sample_chain,occurred_at,timestamp with time zone,NO,now(),NO,null,null
+data_import_batches,id,uuid,NO,gen_random_uuid(),YES,null,null
+data_import_batches,source,text,NO,null,NO,null,null
+data_import_batches,imported_at,timestamp with time zone,NO,null,NO,null,null
+data_import_batches,validation_summary,text,NO,null,NO,null,null
+data_import_batches,created_at,timestamp with time zone,NO,"timezone('utc'::text, now())",NO,null,null
+data_quality_issues,id,uuid,NO,gen_random_uuid(),YES,null,null
+data_quality_issues,record_reference,uuid,NO,null,NO,null,null
+data_quality_issues,issue_type,text,NO,null,NO,null,null
+data_quality_issues,severity,text,NO,null,NO,null,null
+data_quality_issues,resolution_status,text,NO,null,NO,null,null
+data_quality_issues,created_at,timestamp with time zone,NO,"timezone('utc'::text, now())",NO,null,null
+device_assignments,id,uuid,NO,gen_random_uuid(),YES,null,null
+device_assignments,device_id,uuid,NO,null,NO,devices,id

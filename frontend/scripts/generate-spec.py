@@ -1,5 +1,5 @@
 import json, pathlib
-p=pathlib.Path('/mnt/data/astrovitals-vortex-v2/src/data/masterdocs.json')
+p=pathlib.Path(__file__).resolve().parents[1] / 'src/data/masterdocs.json'
 table_groups={
 'Identity / missions / devices':{
 'astronauts':'id,crew_code,display_name,status','missions':'id,name,mission_type,launch_at,landing_at,phase','mission_crew':'mission_id,astronaut_id,crew_role','users':'id,authentication_identity,account_status','roles':'id,role_name,permissions','user_role_assignments':'user_id,role_id,mission_id','devices':'id,device_type,model,calibration_status','device_assignments':'device_id,astronaut_id,location_id,assigned_at,ended_at'},

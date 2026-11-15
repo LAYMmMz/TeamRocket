@@ -1,0 +1,18 @@
+domain,backend_field,backend_value,cloud_table,cloud_column,cloud_value_or_rule,notes
+mission_id,mission_id,DEMO-01,health_logs,mission_id,DEMO-01,Stored directly as TEXT in health_logs and sync_receipts; never cast DEMO-01/DEMO-02 to UUID
+mission_id,mission_id,DEMO-02,health_logs,mission_id,DEMO-02,Supported natively via TEXT mission_id; cross-mission access blocked by RPC/RLS
+astronaut_id,astronaut_id,TEST-CREW-01,astronauts,id,9d5b382b-974d-4d2a-8b68-73f49c1c3ce0,Resolved via lookup on astronauts.crew_code = 'TEST-CREW-01' inside ingest_sync_event
+astronaut_id,astronaut_id,ASTRO-SYNTH-01,astronauts,id,8c4a271a-863c-4c1f-9a57-62e38b0b2bd9,Resolved via lookup on astronauts.crew_code = 'ASTRO-SYNTH-01' inside ingest_sync_event
+vital_signs,kind=measurement|vital_sign,heart_rate / vitals,health_logs,id / heart_rate / normalized_value,Deterministic UUID from md5(kind:record_id),Authoritative destination for offline sync telemetry; no double writes to public.vital_signs
+symptoms,severity,serious,symptom_reports,severity,3,Mapped scale: 1=mild, 2=moderate, 3=serious, 4=severe, 5=critical
+symptoms,severity,severe,symptom_reports,severity,4,Mapped scale: 1=mild, 2=moderate, 3=serious, 4=severe, 5=critical
+symptoms,severity,critical,symptom_reports,severity,5,Mapped scale: 1=mild, 2=moderate, 3=serious, 4=severe, 5=critical
+alert_rules,version,integer (e.g. 1),alert_rules,version,TEXT (e.g. '1'),Backend casts integer version to string; unapproved rules excluded from operational evaluationmeasurement_fields,payload.*,metric / value / unit / quality / timestamp,health_logs,heart_rate / original_value / original_unit / quality_status / measured_at,Dual-alias mapping inside ingest_sync_event,Accepts both Dev 1 queue keys and canonical column keys
+mission_id,mission_id,DEMO-02,clinical_records,mission_id,DEMO-02,Supported natively via TEXT mission_id; cross-mission access blocked by RPC/RLS
+clinical_records,kind=radiation,radiation_dosage / radiation logs,clinical_records,id / record_kind / clinical_payload,Deterministic UUID from md5('radiation:' || record_id),Dev 2 radiation module synced via ingest_sync_event into public.clinical_records
+clinical_records,kind=environment,environmental_logs / cabin environment,clinical_records,id / record_kind / clinical_payload,Deterministic UUID from md5('environment:' || record_id),Dev 2 environment module synced via ingest_sync_event into public.clinical_records
+clinical_records,kind=symptom,symptom_reports / symptom logs,clinical_records,id / record_kind / clinical_payload,Deterministic UUID from md5('symptom:' || record_id); severity 1-5 mapped,Dev 2 symptom module synced via ingest_sync_event into public.clinical_records
+clinical_records,kind=laboratory_result,laboratory_results / lab panels,clinical_records,id / record_kind / clinical_payload,Deterministic UUID from md5('laboratory_result:' || record_id),Dev 2 laboratory module synced via ingest_sync_event into public.clinical_records
+clinical_records,kind=examination,examinations / clinical exams,clinical_records,id / record_kind / clinical_payload,Deterministic UUID from md5('examination:' || record_id),Dev 2 examinations module synced via ingest_sync_event into public.clinical_records
+clinical_records,kind=wellness,wellness_logs / behavioral & sleep,clinical_records,id / record_kind / clinical_payload,Deterministic UUID from md5('wellness:' || record_id),Dev 2 wellness module synced via ingest_sync_event into public.clinical_records
+clinical_records,kind=report,clinical_reports / mission summaries,clinical_records,id / record_kind / clinical_payload,Deterministic UUID from md5('report:' || record_id),Dev 2 reports module synced via ingest_sync_event into public.clinical_records
