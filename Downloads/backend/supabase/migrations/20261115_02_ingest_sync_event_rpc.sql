@@ -156,18 +156,35 @@ CREATE POLICY "sync_audit_log_read_mission_members"
         )
     );
 
--- 3. Seed synthetic astronauts and verified DEMO-02 auth user
+-- 3. Seed synthetic astronauts and DEMO-02 mission membership (guarded by auth.users existence)
 INSERT INTO public.astronauts (id, crew_code, display_name, status)
 VALUES
     ('8c4a271a-863c-4c1f-9a57-62e38b0b2bd9', 'ASTRO-SYNTH-01', 'Synthetic Test Astronaut 01', 'ACTIVE'),
     ('9d5b382b-974d-4d2a-8b68-73f49c1c3ce0', 'TEST-CREW-01', 'Demo Crew Member 01', 'ACTIVE')
 ON CONFLICT (id) DO NOTHING;
 
-INSERT INTO public.mission_members (mission_id, user_id, role)
-VALUES ('DEMO-02', '7828d6d5-0f32-4634-a810-3680a64b6059', 'operator')
-ON CONFLICT (mission_id, user_id) DO NOTHING;
+DO $$
+DECLARE
+    v_operator_uid UUID;
+BEGIN
+    SELECT id INTO v_operator_uid
+    FROM auth.users
+    WHERE id = '7828d6d5-0f32-4634-a810-3680a64b6059'
+       OR email = 'operator.demo02@teamrocket.test'
+    ORDER BY (id = '7828d6d5-0f32-4634-a810-3680a64b6059') DESC
+    LIMIT 1;
 
--- 4. RPC Function: stores metric_code + value for ALL supported vitals
+    IF v_operator_uid IS NOT NULL THEN
+        INSERT INTO public.mission_members (mission_id, user_id, role)
+        VALUES ('DEMO-02', v_operator_uid, 'operator')
+        ON CONFLICT (mission_id, user_id) DO NOTHING;
+    ELSE
+        RAISE NOTICE 'Skipping DEMO-02 mission_members seed: create operator.demo02@teamrocket.test in Supabase Auth first.';
+    END IF;
+END;
+$$;
+
+-- 4. RPC Function: stores metric_code + value and rejects duplicate health_logs IDs
 CREATE OR REPLACE FUNCTION public.ingest_sync_event(p_event JSONB)
 RETURNS JSONB
 LANGUAGE plpgsql
@@ -197,6 +214,7 @@ DECLARE
     v_measured_at TIMESTAMPTZ := COALESCE((v_payload->>'measured_at')::TIMESTAMPTZ, (v_payload->>'timestamp')::TIMESTAMPTZ);
 
     v_log_id UUID;
+    v_inserted_log_id UUID;
     v_existing RECORD;
     v_receipt_id UUID;
 BEGIN
@@ -306,7 +324,35 @@ BEGIN
         NOW(),
         v_audit
     )
-    ON CONFLICT (id) DO NOTHING;
+    ON CONFLICT (id) DO NOTHING
+    RETURNING id INTO v_inserted_log_id;
+
+    IF v_inserted_log_id IS NULL THEN
+        INSERT INTO public.sync_audit_log (
+            event_id, receipt_id, mission_id, actor_id, action, audit_payload
+        )
+        VALUES (
+            v_event_id,
+            NULL,
+            v_mission_id,
+            v_user_id,
+            'CONFLICT_REJECTED',
+            jsonb_build_object(
+                'reason', 'duplicate_health_log_id',
+                'record_id', v_record_id,
+                'health_log_id', v_log_id
+            )
+        );
+
+        RETURN jsonb_build_object(
+            'status', 'conflict',
+            'code', '23505',
+            'event_id', v_event_id,
+            'record_id', v_record_id,
+            'health_log_id', v_log_id,
+            'message', 'Conflict: health_logs record id already exists; incoming measurement was not stored'
+        );
+    END IF;
 
     INSERT INTO public.sync_receipts (
         event_id, mission_id, kind, record_id, payload_hash, previous_hash, immutable, received_by
