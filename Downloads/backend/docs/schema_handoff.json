@@ -1,31 +1,33 @@
 {
-  "project_ref": "ziecxjoeljxoocixejtz",
+  "project_ref": "ziecxjoelixoocixejtz",
   "branch": "Database",
-  "reference_date": "2026-11-15",
+  "reference_date": "2026-11-16",
   "status": "HARDENED_READY_FOR_REVIEW",
-  "receipt_contract_version": "v1.1",
+  "receipt_contract_version": "v1.2",
   "deployed_rpc": "public.ingest_sync_event",
   "authoritative_vitals_table": "public.health_logs",
+  "authoritative_clinical_table": "public.clinical_records",
   "table_reconciliation": {
     "logical_target_count": 57,
-    "exported_public_table_count": 62,
+    "exported_public_table_count": 63,
     "intentional_additional_tables": [
       "public.sync_receipts",
       "public.sync_audit_log",
       "public.health_logs",
+      "public.clinical_records",
       "public.mission_members",
       "public.astronauts_seed_lookup"
     ],
-    "notes": "57 core domain tables plus 5 sync ledger, audit, unified telemetry ingestion, and fail-closed mission membership tables."
+    "notes": "57 core domain tables plus 6 sync ledger, audit, unified telemetry/clinical ingestion, and fail-closed mission membership tables."
   },
-  "migration_file": "supabase/migrations/20261115_02_ingest_sync_event_rpc.sql",
-  "rollback_file": "supabase/migrations/20261115_02_rollback.sql",
-  "migration_sha256": "0403e5a2a0c2f9adb880e23b2ecf6af1490919d7b21ab4d7776080709103e257",
+  "migration_file": "supabase/migrations/20261116_03_clinical_sync_rpc.sql",
+  "rollback_file": "supabase/migrations/20261116_03_rollback.sql",
+  "migration_sha256": "8905530ee6c090b4471fa157ca633ee0e78f61d1a18d407722678356464ef804",
   "hardening_verifications": {
     "non_destructive_idempotent_sql": true,
     "fail_closed_mission_membership": true,
     "strict_astronaut_lookup_no_uid_fallback": true,
-    "unsupported_event_kinds_rejected": true,
+    "dev1_vitals_and_dev2_clinical_kinds_supported": true,
     "dual_measurement_payload_aliases": true,
     "persistent_conflict_audit_without_rollback": true,
     "offline_sqlite_preserved": true,
