@@ -1,3 +1,6 @@
+"""TeamRocket measurement endpoints with development-only team SQLite mirror."""
+import logging
+
 from fastapi import APIRouter, Depends
 
 from app.auth.dependencies import require
@@ -7,7 +10,6 @@ from app.measurements.service import ingest
 
 # Compatibility exports for earlier imports.
 from app.measurements.units import UNITS, validate_domain
-
 
 router = APIRouter(tags=["measurements"])
 
@@ -21,12 +23,24 @@ def create_measurement(
 ):
     principal.require_mission(record.mission_id)
 
-    return ingest(
-        record,
-        store,
-        settings,
-        principal.user_id,
-    )
+    # Existing encrypted store remains authoritative. This operation already
+    # validates, audits, evaluates rules, and enqueues cloud synchronization.
+    result = ingest(record, store, settings, principal.user_id)
+
+    # Development-only, best-effort projection into teammate's plaintext DB.
+    # No real clinical data, no second cloud sync/outbox, no change to 201 on
+    # a mirror failure. Replay missing data with team_sqlite_bridge.py.
+    if settings.environment == "development" and record.is_synthetic:
+        try:
+            from team_sqlite_bridge import mirror_record
+            result["team_sqlite_mirror"] = mirror_record(result["measurement"])
+        except Exception:
+            logging.getLogger(__name__).exception(
+                "Development team SQLite mirror failed"
+            )
+            result["team_sqlite_mirror"] = "error"
+
+    return result
 
 
 @router.get("/measurements")
@@ -36,7 +50,6 @@ def list_measurements(
     store=Depends(get_store),
 ):
     principal.require_mission(mission_id)
-
     return {
         "items": store.list(
             "measurement",

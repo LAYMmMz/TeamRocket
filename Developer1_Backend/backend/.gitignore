@@ -1,0 +1,24 @@
+# React / Node.js dependencies
+node_modules/
+
+# Python virtual environments
+.venv/
+venv/
+
+# Python generated files
+__pycache__/
+*.pyc
+
+# Generated build files
+dist/
+build/
+
+# Local secrets and credentials
+.env
+.env.*
+!.env.example
+
+# Editor and operating system files
+.vscode/
+.DS_Store
+Thumbs.db

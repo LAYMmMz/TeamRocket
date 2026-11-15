@@ -28,7 +28,7 @@ import uvicorn
 settings = Settings()
 settings.validate()
 token = issue_development_token(
-    settings, "developer", ["admin"], ["DEMO-01"]
+    settings, "developer", ["admin"], ["DEMO-01", "DEMO-02"]
 )
 
 print("\nDevelopment token:\n" + token)

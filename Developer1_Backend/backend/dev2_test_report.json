@@ -1,0 +1,432 @@
+{
+  "generated_at": "2026-11-15T15:22:32.790469+00:00",
+  "counts": {
+    "PASS": 101,
+    "FAIL": 0,
+    "ERROR": 0,
+    "BLOCKED": 2
+  },
+  "tests": [
+    {
+      "test": "test_api_01_health_and_local_schema (tests.test_dev2_api.Dev2NewFeatureAPI.test_api_01_health_and_local_schema)",
+      "status": "PASS"
+    },
+    {
+      "test": "test_api_02_dev2_catalog (tests.test_dev2_api.Dev2NewFeatureAPI.test_api_02_dev2_catalog)",
+      "status": "PASS"
+    },
+    {
+      "test": "test_api_03_vitals_create_and_list (tests.test_dev2_api.Dev2NewFeatureAPI.test_api_03_vitals_create_and_list)",
+      "status": "PASS"
+    },
+    {
+      "test": "test_api_04_radiation_create_and_list (tests.test_dev2_api.Dev2NewFeatureAPI.test_api_04_radiation_create_and_list)",
+      "status": "PASS"
+    },
+    {
+      "test": "test_api_05_environment_create_and_list (tests.test_dev2_api.Dev2NewFeatureAPI.test_api_05_environment_create_and_list)",
+      "status": "PASS"
+    },
+    {
+      "test": "test_api_06_sleep_create_and_list (tests.test_dev2_api.Dev2NewFeatureAPI.test_api_06_sleep_create_and_list)",
+      "status": "PASS"
+    },
+    {
+      "test": "test_api_07_reports_count_and_label (tests.test_dev2_api.Dev2NewFeatureAPI.test_api_07_reports_count_and_label)",
+      "status": "PASS"
+    },
+    {
+      "test": "test_api_08_baseline_missing_is_unavailable (tests.test_dev2_api.Dev2NewFeatureAPI.test_api_08_baseline_missing_is_unavailable)",
+      "status": "PASS"
+    },
+    {
+      "test": "test_auth_01_requires_token (tests.test_dev2_api.Dev2NewFeatureAPI.test_auth_01_requires_token)",
+      "status": "PASS"
+    },
+    {
+      "test": "test_auth_02_bad_token_rejected (tests.test_dev2_api.Dev2NewFeatureAPI.test_auth_02_bad_token_rejected)",
+      "status": "PASS"
+    },
+    {
+      "test": "test_auth_03_researcher_cannot_write (tests.test_dev2_api.Dev2NewFeatureAPI.test_auth_03_researcher_cannot_write)",
+      "status": "PASS"
+    },
+    {
+      "test": "test_auth_04_mission_scope_rejected (tests.test_dev2_api.Dev2NewFeatureAPI.test_auth_04_mission_scope_rejected)",
+      "status": "PASS"
+    },
+    {
+      "test": "test_auth_05_private_behavioral_read_denied (tests.test_dev2_api.Dev2NewFeatureAPI.test_auth_05_private_behavioral_read_denied)",
+      "status": "PASS"
+    },
+    {
+      "test": "test_auth_06_private_behavioral_write_denied (tests.test_dev2_api.Dev2NewFeatureAPI.test_auth_06_private_behavioral_write_denied)",
+      "status": "PASS"
+    },
+    {
+      "test": "test_duplicate_01_same_vital_has_no_second_record (tests.test_dev2_api.Dev2NewFeatureAPI.test_duplicate_01_same_vital_has_no_second_record)",
+      "status": "PASS"
+    },
+    {
+      "test": "test_duplicate_02_conflicting_domain_evidence_rejected (tests.test_dev2_api.Dev2NewFeatureAPI.test_duplicate_02_conflicting_domain_evidence_rejected)",
+      "status": "PASS"
+    },
+    {
+      "test": "test_s01_normal_vitals_no_unapproved_alert (tests.test_dev2_api.Dev2NewFeatureAPI.test_s01_normal_vitals_no_unapproved_alert)",
+      "status": "PASS"
+    },
+    {
+      "test": "test_s02_workout_context_preserved (tests.test_dev2_api.Dev2NewFeatureAPI.test_s02_workout_context_preserved)",
+      "status": "PASS"
+    },
+    {
+      "test": "test_s03_severe_symptom_without_spo2_local_incident (tests.test_dev2_api.Dev2NewFeatureAPI.test_s03_severe_symptom_without_spo2_local_incident)",
+      "status": "PASS"
+    },
+    {
+      "test": "test_s04_window_co2_headache_linked_incident (tests.test_dev2_api.Dev2NewFeatureAPI.test_s04_window_co2_headache_linked_incident)",
+      "status": "BLOCKED",
+      "details": "S04 linked CO2/headache incident rule not implemented by the provided prototype"
+    },
+    {
+      "test": "test_s05_ddimer_review_only (tests.test_dev2_api.Dev2NewFeatureAPI.test_s05_ddimer_review_only)",
+      "status": "PASS"
+    },
+    {
+      "test": "test_s06_left_vascular_side_recorded (tests.test_dev2_api.Dev2NewFeatureAPI.test_s06_left_vascular_side_recorded)",
+      "status": "PASS"
+    },
+    {
+      "test": "test_s07_stale_dosimeter_preserved (tests.test_dev2_api.Dev2NewFeatureAPI.test_s07_stale_dosimeter_preserved)",
+      "status": "PASS"
+    },
+    {
+      "test": "test_s08_inflight_bone_dxa_rejected (tests.test_dev2_api.Dev2NewFeatureAPI.test_s08_inflight_bone_dxa_rejected)",
+      "status": "PASS"
+    },
+    {
+      "test": "test_s09_culture_sampling_method_retained (tests.test_dev2_api.Dev2NewFeatureAPI.test_s09_culture_sampling_method_retained)",
+      "status": "PASS"
+    },
+    {
+      "test": "test_s10_offline_queue_and_in_memory_receipt (tests.test_dev2_api.Dev2NewFeatureAPI.test_s10_offline_queue_and_in_memory_receipt)",
+      "status": "PASS"
+    },
+    {
+      "test": "test_s11_unapproved_operational_rule_not_triggered (tests.test_dev2_api.Dev2NewFeatureAPI.test_s11_unapproved_operational_rule_not_triggered)",
+      "status": "PASS"
+    },
+    {
+      "test": "test_s12_behavioral_private_denied (tests.test_dev2_api.Dev2NewFeatureAPI.test_s12_behavioral_private_denied)",
+      "status": "PASS"
+    },
+    {
+      "test": "test_sqlite_01_record_survives_restart (tests.test_dev2_api.Dev2NewFeatureAPI.test_sqlite_01_record_survives_restart)",
+      "status": "PASS"
+    },
+    {
+      "test": "test_sqlite_02_cloud_offline_local_save (tests.test_dev2_api.Dev2NewFeatureAPI.test_sqlite_02_cloud_offline_local_save)",
+      "status": "PASS"
+    },
+    {
+      "test": "test_sqlite_03_queue_status (tests.test_dev2_api.Dev2NewFeatureAPI.test_sqlite_03_queue_status)",
+      "status": "PASS"
+    },
+    {
+      "test": "test_sqlite_04_cloud_receipt_in_memory (tests.test_dev2_api.Dev2NewFeatureAPI.test_sqlite_04_cloud_receipt_in_memory)",
+      "status": "PASS"
+    },
+    {
+      "test": "test_upgrade_01_exams_due_overdue (tests.test_dev2_api.Dev2NewFeatureAPI.test_upgrade_01_exams_due_overdue)",
+      "status": "PASS"
+    },
+    {
+      "test": "test_upgrade_02_radiation_dose_ignores_unverified (tests.test_dev2_api.Dev2NewFeatureAPI.test_upgrade_02_radiation_dose_ignores_unverified)",
+      "status": "PASS"
+    },
+    {
+      "test": "test_upgrade_03_unverified_environment_cannot_alert (tests.test_dev2_api.Dev2NewFeatureAPI.test_upgrade_03_unverified_environment_cannot_alert)",
+      "status": "PASS"
+    },
+    {
+      "test": "test_upgrade_04_seven_dashboards (tests.test_dev2_api.Dev2NewFeatureAPI.test_upgrade_04_seven_dashboards)",
+      "status": "PASS"
+    },
+    {
+      "test": "test_upgrade_05_csv_format_privacy (tests.test_dev2_api.Dev2NewFeatureAPI.test_upgrade_05_csv_format_privacy)",
+      "status": "PASS"
+    },
+    {
+      "test": "test_upgrade_06_unapproved_lab_result_manual_review (tests.test_dev2_api.Dev2NewFeatureAPI.test_upgrade_06_unapproved_lab_result_manual_review)",
+      "status": "PASS"
+    },
+    {
+      "test": "test_upgrade_07_severe_symptom_escalates_without_spo2 (tests.test_dev2_api.Dev2NewFeatureAPI.test_upgrade_07_severe_symptom_escalates_without_spo2)",
+      "status": "PASS"
+    },
+    {
+      "test": "test_upgrade_08_radiation_manual_review_not_operational_alarm (tests.test_dev2_api.Dev2NewFeatureAPI.test_upgrade_08_radiation_manual_review_not_operational_alarm)",
+      "status": "PASS"
+    },
+    {
+      "test": "test_valid_01_invalid_vital_unit_rejected (tests.test_dev2_api.Dev2NewFeatureAPI.test_valid_01_invalid_vital_unit_rejected)",
+      "status": "PASS"
+    },
+    {
+      "test": "test_valid_02_invalid_radiation_conversion_rejected (tests.test_dev2_api.Dev2NewFeatureAPI.test_valid_02_invalid_radiation_conversion_rejected)",
+      "status": "PASS"
+    },
+    {
+      "test": "test_valid_03_environment_average_window_rejected (tests.test_dev2_api.Dev2NewFeatureAPI.test_valid_03_environment_average_window_rejected)",
+      "status": "PASS"
+    },
+    {
+      "test": "test_valid_04_demo_staging_rejects_real_data (tests.test_dev2_api.Dev2NewFeatureAPI.test_valid_04_demo_staging_rejects_real_data)",
+      "status": "PASS"
+    },
+    {
+      "test": "test_all_12_scenario_fixtures (tests.test_dev2_api.FixtureTests.test_all_12_scenario_fixtures)",
+      "status": "PASS"
+    },
+    {
+      "test": "test_generated_data_not_inserted_into_sqlite (tests.test_dev2_api.FixtureTests.test_generated_data_not_inserted_into_sqlite)",
+      "status": "PASS"
+    },
+    {
+      "test": "test_scenario_fixtures_deterministic (tests.test_dev2_api.FixtureTests.test_scenario_fixtures_deterministic)",
+      "status": "PASS"
+    },
+    {
+      "test": "test_seed_all_required_counts (tests.test_dev2_api.FixtureTests.test_seed_all_required_counts)",
+      "status": "PASS"
+    },
+    {
+      "test": "test_seed_repeatability_byte_for_byte (tests.test_dev2_api.FixtureTests.test_seed_repeatability_byte_for_byte)",
+      "status": "PASS"
+    },
+    {
+      "test": "test_seed_source_labels (tests.test_dev2_api.FixtureTests.test_seed_source_labels)",
+      "status": "PASS"
+    },
+    {
+      "test": "test_api_01_health_and_local_schema (tests.test_dev2_api.IsolatedAPI.test_api_01_health_and_local_schema)",
+      "status": "PASS"
+    },
+    {
+      "test": "test_api_02_dev2_catalog (tests.test_dev2_api.IsolatedAPI.test_api_02_dev2_catalog)",
+      "status": "PASS"
+    },
+    {
+      "test": "test_api_03_vitals_create_and_list (tests.test_dev2_api.IsolatedAPI.test_api_03_vitals_create_and_list)",
+      "status": "PASS"
+    },
+    {
+      "test": "test_api_04_radiation_create_and_list (tests.test_dev2_api.IsolatedAPI.test_api_04_radiation_create_and_list)",
+      "status": "PASS"
+    },
+    {
+      "test": "test_api_05_environment_create_and_list (tests.test_dev2_api.IsolatedAPI.test_api_05_environment_create_and_list)",
+      "status": "PASS"
+    },
+    {
+      "test": "test_api_06_sleep_create_and_list (tests.test_dev2_api.IsolatedAPI.test_api_06_sleep_create_and_list)",
+      "status": "PASS"
+    },
+    {
+      "test": "test_api_07_reports_count_and_label (tests.test_dev2_api.IsolatedAPI.test_api_07_reports_count_and_label)",
+      "status": "PASS"
+    },
+    {
+      "test": "test_api_08_baseline_missing_is_unavailable (tests.test_dev2_api.IsolatedAPI.test_api_08_baseline_missing_is_unavailable)",
+      "status": "PASS"
+    },
+    {
+      "test": "test_auth_01_requires_token (tests.test_dev2_api.IsolatedAPI.test_auth_01_requires_token)",
+      "status": "PASS"
+    },
+    {
+      "test": "test_auth_02_bad_token_rejected (tests.test_dev2_api.IsolatedAPI.test_auth_02_bad_token_rejected)",
+      "status": "PASS"
+    },
+    {
+      "test": "test_auth_03_researcher_cannot_write (tests.test_dev2_api.IsolatedAPI.test_auth_03_researcher_cannot_write)",
+      "status": "PASS"
+    },
+    {
+      "test": "test_auth_04_mission_scope_rejected (tests.test_dev2_api.IsolatedAPI.test_auth_04_mission_scope_rejected)",
+      "status": "PASS"
+    },
+    {
+      "test": "test_auth_05_private_behavioral_read_denied (tests.test_dev2_api.IsolatedAPI.test_auth_05_private_behavioral_read_denied)",
+      "status": "PASS"
+    },
+    {
+      "test": "test_auth_06_private_behavioral_write_denied (tests.test_dev2_api.IsolatedAPI.test_auth_06_private_behavioral_write_denied)",
+      "status": "PASS"
+    },
+    {
+      "test": "test_duplicate_01_same_vital_has_no_second_record (tests.test_dev2_api.IsolatedAPI.test_duplicate_01_same_vital_has_no_second_record)",
+      "status": "PASS"
+    },
+    {
+      "test": "test_duplicate_02_conflicting_domain_evidence_rejected (tests.test_dev2_api.IsolatedAPI.test_duplicate_02_conflicting_domain_evidence_rejected)",
+      "status": "PASS"
+    },
+    {
+      "test": "test_s01_normal_vitals_no_unapproved_alert (tests.test_dev2_api.IsolatedAPI.test_s01_normal_vitals_no_unapproved_alert)",
+      "status": "PASS"
+    },
+    {
+      "test": "test_s02_workout_context_preserved (tests.test_dev2_api.IsolatedAPI.test_s02_workout_context_preserved)",
+      "status": "PASS"
+    },
+    {
+      "test": "test_s03_severe_symptom_without_spo2_local_incident (tests.test_dev2_api.IsolatedAPI.test_s03_severe_symptom_without_spo2_local_incident)",
+      "status": "PASS"
+    },
+    {
+      "test": "test_s04_window_co2_headache_linked_incident (tests.test_dev2_api.IsolatedAPI.test_s04_window_co2_headache_linked_incident)",
+      "status": "BLOCKED",
+      "details": "S04 linked CO2/headache incident rule not implemented by the provided prototype"
+    },
+    {
+      "test": "test_s05_ddimer_review_only (tests.test_dev2_api.IsolatedAPI.test_s05_ddimer_review_only)",
+      "status": "PASS"
+    },
+    {
+      "test": "test_s06_left_vascular_side_recorded (tests.test_dev2_api.IsolatedAPI.test_s06_left_vascular_side_recorded)",
+      "status": "PASS"
+    },
+    {
+      "test": "test_s07_stale_dosimeter_preserved (tests.test_dev2_api.IsolatedAPI.test_s07_stale_dosimeter_preserved)",
+      "status": "PASS"
+    },
+    {
+      "test": "test_s08_inflight_bone_dxa_rejected (tests.test_dev2_api.IsolatedAPI.test_s08_inflight_bone_dxa_rejected)",
+      "status": "PASS"
+    },
+    {
+      "test": "test_s09_culture_sampling_method_retained (tests.test_dev2_api.IsolatedAPI.test_s09_culture_sampling_method_retained)",
+      "status": "PASS"
+    },
+    {
+      "test": "test_s10_offline_queue_and_in_memory_receipt (tests.test_dev2_api.IsolatedAPI.test_s10_offline_queue_and_in_memory_receipt)",
+      "status": "PASS"
+    },
+    {
+      "test": "test_s11_unapproved_operational_rule_not_triggered (tests.test_dev2_api.IsolatedAPI.test_s11_unapproved_operational_rule_not_triggered)",
+      "status": "PASS"
+    },
+    {
+      "test": "test_s12_behavioral_private_denied (tests.test_dev2_api.IsolatedAPI.test_s12_behavioral_private_denied)",
+      "status": "PASS"
+    },
+    {
+      "test": "test_sqlite_01_record_survives_restart (tests.test_dev2_api.IsolatedAPI.test_sqlite_01_record_survives_restart)",
+      "status": "PASS"
+    },
+    {
+      "test": "test_sqlite_02_cloud_offline_local_save (tests.test_dev2_api.IsolatedAPI.test_sqlite_02_cloud_offline_local_save)",
+      "status": "PASS"
+    },
+    {
+      "test": "test_sqlite_03_queue_status (tests.test_dev2_api.IsolatedAPI.test_sqlite_03_queue_status)",
+      "status": "PASS"
+    },
+    {
+      "test": "test_sqlite_04_cloud_receipt_in_memory (tests.test_dev2_api.IsolatedAPI.test_sqlite_04_cloud_receipt_in_memory)",
+      "status": "PASS"
+    },
+    {
+      "test": "test_valid_01_invalid_vital_unit_rejected (tests.test_dev2_api.IsolatedAPI.test_valid_01_invalid_vital_unit_rejected)",
+      "status": "PASS"
+    },
+    {
+      "test": "test_valid_02_invalid_radiation_conversion_rejected (tests.test_dev2_api.IsolatedAPI.test_valid_02_invalid_radiation_conversion_rejected)",
+      "status": "PASS"
+    },
+    {
+      "test": "test_valid_03_environment_average_window_rejected (tests.test_dev2_api.IsolatedAPI.test_valid_03_environment_average_window_rejected)",
+      "status": "PASS"
+    },
+    {
+      "test": "test_valid_04_demo_staging_rejects_real_data (tests.test_dev2_api.IsolatedAPI.test_valid_04_demo_staging_rejects_real_data)",
+      "status": "PASS"
+    },
+    {
+      "test": "test_01_exams_planned_due_overdue (tests.test_dev2_upgrade.Dev2ClinicalSafetyTests.test_01_exams_planned_due_overdue)",
+      "status": "PASS"
+    },
+    {
+      "test": "test_02_exams_cancelled_never_fabricates_result (tests.test_dev2_upgrade.Dev2ClinicalSafetyTests.test_02_exams_cancelled_never_fabricates_result)",
+      "status": "PASS"
+    },
+    {
+      "test": "test_03_radiation_compatible_intervals (tests.test_dev2_upgrade.Dev2ClinicalSafetyTests.test_03_radiation_compatible_intervals)",
+      "status": "PASS"
+    },
+    {
+      "test": "test_04_radiation_excludes_overlap (tests.test_dev2_upgrade.Dev2ClinicalSafetyTests.test_04_radiation_excludes_overlap)",
+      "status": "PASS"
+    },
+    {
+      "test": "test_05_radiation_never_adds_dose_rate (tests.test_dev2_upgrade.Dev2ClinicalSafetyTests.test_05_radiation_never_adds_dose_rate)",
+      "status": "PASS"
+    },
+    {
+      "test": "test_06_unverified_radiation_never_summed (tests.test_dev2_upgrade.Dev2ClinicalSafetyTests.test_06_unverified_radiation_never_summed)",
+      "status": "PASS"
+    },
+    {
+      "test": "test_07_environment_uses_average_window_and_verified_only (tests.test_dev2_upgrade.Dev2ClinicalSafetyTests.test_07_environment_uses_average_window_and_verified_only)",
+      "status": "PASS"
+    },
+    {
+      "test": "test_08_ocular_does_not_compare_other_eyes (tests.test_dev2_upgrade.Dev2ClinicalSafetyTests.test_08_ocular_does_not_compare_other_eyes)",
+      "status": "PASS"
+    },
+    {
+      "test": "test_09_matched_eyes_methods_are_descriptive (tests.test_dev2_upgrade.Dev2ClinicalSafetyTests.test_09_matched_eyes_methods_are_descriptive)",
+      "status": "PASS"
+    },
+    {
+      "test": "test_10_bone_no_cross_region_comparison (tests.test_dev2_upgrade.Dev2ClinicalSafetyTests.test_10_bone_no_cross_region_comparison)",
+      "status": "PASS"
+    },
+    {
+      "test": "test_11_water_culture_review_requires_human (tests.test_dev2_upgrade.Dev2ClinicalSafetyTests.test_11_water_culture_review_requires_human)",
+      "status": "PASS"
+    },
+    {
+      "test": "test_12_gravity_does_not_clear_eva (tests.test_dev2_upgrade.Dev2ClinicalSafetyTests.test_12_gravity_does_not_clear_eva)",
+      "status": "PASS"
+    },
+    {
+      "test": "test_13_sequence_not_diagnosis (tests.test_dev2_upgrade.Dev2ClinicalSafetyTests.test_13_sequence_not_diagnosis)",
+      "status": "PASS"
+    },
+    {
+      "test": "test_14_source_consistency_blocks_mislabeled_data (tests.test_dev2_upgrade.Dev2ClinicalSafetyTests.test_14_source_consistency_blocks_mislabeled_data)",
+      "status": "PASS"
+    },
+    {
+      "test": "test_15_invalid_environment_averaging_window_blocked (tests.test_dev2_upgrade.Dev2ClinicalSafetyTests.test_15_invalid_environment_averaging_window_blocked)",
+      "status": "PASS"
+    },
+    {
+      "test": "test_16_no_clinical_diagnosis_from_ddimer (tests.test_dev2_upgrade.Dev2ClinicalSafetyTests.test_16_no_clinical_diagnosis_from_ddimer)",
+      "status": "PASS"
+    },
+    {
+      "test": "test_17_timezone_naive_rejected (tests.test_dev2_upgrade.Dev2ClinicalSafetyTests.test_17_timezone_naive_rejected)",
+      "status": "PASS"
+    }
+  ],
+  "clinical_operational_acceptance": false,
+  "live_supabase_verified": false,
+  "notes": [
+    "Logic tests run here; API tests run only when installed in existing backend.",
+    "Scenario descriptors/fixtures do not imply S01-S12 are end-to-end verified.",
+    "No claims of operational medical approvals or diagnosis."
+  ]
+}
