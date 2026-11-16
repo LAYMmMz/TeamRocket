@@ -9,12 +9,12 @@ Frontend Vercel project (Root Directory `frontend`, Vite, output `dist`):
 ```dotenv
 VITE_DATA_MODE=api
 VITE_API_BASE_URL=https://YOUR-BACKEND-HTTPS-DOMAIN/api/v1
-VITE_SUPABASE_URL=https://YOUR-SUPABASE-PROJECT.supabase.co
+VITE_SUPABASE_URL=https://ziecxjoeljxoocixejtz.supabase.co
 VITE_SUPABASE_PUBLISHABLE_KEY=YOUR_PUBLIC_SUPABASE_PUBLISHABLE_KEY
 ```
 `VITE_` variables are published to browser builds; use ONLY public Supabase keys. Do not use `NEXT_PUBLIC_` in this Vite project: that prefix is for Next.js. The frontend accepts `VITE_SUPABASE_PUBLISHABLE_KEY` or its legacy fallback `VITE_SUPABASE_ANON_KEY`. In the backend, the existing `SUPABASE_ANON_KEY` configuration can hold a publishable key because it is sent as an `apikey` header, not as a bearer JWT.
 
-**Project identification:** The checked-in `docs/database/schema_handoff.json` identifies project `ziecxjoelixoocixejtz`, whereas a later user-supplied URL identifies `ziecxjoeljxoocixejtz`. These are different Supabase project refs. Confirm the correct project in Supabase **Settings > General** before configuring any deployment or migrating data. This deployment guide intentionally contains placeholders rather than choosing one. For an initial Vercel demo leave `VITE_DATA_MODE=demo`, without backend credentials.
+**Confirmed TeamRocket Supabase project:** `ziecxjoeljxoocixejtz` (project URL `https://ziecxjoeljxoocixejtz.supabase.co`). The repository's historical `docs/database/schema_handoff.json` names a different project reference, `ziecxjoelixoocixejtz`. **Do not treat that historical handoff as evidence that the confirmed project has the claimed 63 tables, migrations, permissions, or live RPC.** Inspect the confirmed project independently with `supabase/queries/integration_preflight.sql`, and only then reconcile or apply reviewed migrations. No keys are stored in this document. For an initial Vercel demo leave `VITE_DATA_MODE=demo`, without backend credentials.
 
 Backend persistent host (Dockerfile at `backend/Dockerfile`, **build context repository root**; persistent mount at `/data`):
 ```dotenv
@@ -23,11 +23,11 @@ SQLITE_PATH=/data/offline.db
 DEV2_DATABASE_URL=sqlite:////data/dev2_clinical.db
 LOCAL_ENCRYPTION_KEY=GENERATE_EXTERNALLY_AND_STORE_AS_SECRET
 OFFLINE_GRANT_SECRET=GENERATE_32PLUS_RANDOM_CHARS_EXTERNALLY
-AUTH_ISSUER=https://YOUR-SUPABASE-PROJECT.supabase.co/auth/v1
-AUTH_JWKS_URL=https://YOUR-SUPABASE-PROJECT.supabase.co/auth/v1/.well-known/jwks.json
+AUTH_ISSUER=https://ziecxjoeljxoocixejtz.supabase.co/auth/v1
+AUTH_JWKS_URL=https://ziecxjoeljxoocixejtz.supabase.co/auth/v1/.well-known/jwks.json
 AUTH_AUDIENCE=authenticated
 CORS_ORIGINS=https://YOUR-VERCEL-DOMAIN.vercel.app
-SUPABASE_URL=https://YOUR-SUPABASE-PROJECT.supabase.co
+SUPABASE_URL=https://ziecxjoeljxoocixejtz.supabase.co
 SUPABASE_ANON_KEY=YOUR_PUBLIC_SUPABASE_PUBLISHABLE_OR_LEGACY_ANON_KEY
 ```
 `LOCAL_ENCRYPTION_KEY` must be a Fernet-compatible key generated with
