@@ -5,7 +5,7 @@
 type AuthSession = {access_token:string;refresh_token:string;expires_at:number};
 const storageKey='rocketpulse-auth-session';
 const url=(import.meta.env.VITE_SUPABASE_URL||'').replace(/\/$/,'');
-const anon=import.meta.env.VITE_SUPABASE_ANON_KEY||'';
+const anon=import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY||import.meta.env.VITE_SUPABASE_ANON_KEY||''; // Support current publishable and legacy anon keys
 const configured=Boolean(url && anon);
 let session:AuthSession|null=null;
 try {
