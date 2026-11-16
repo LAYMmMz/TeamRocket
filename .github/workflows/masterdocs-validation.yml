@@ -1,0 +1,38 @@
+name: MasterDocs scenario evidence (local only)
+on:
+  pull_request:
+    paths:
+      - 'backend/**'
+      - 'supabase/**'
+      - '.github/workflows/masterdocs-validation.yml'
+  push:
+    paths:
+      - 'backend/**'
+      - 'supabase/**'
+      - '.github/workflows/masterdocs-validation.yml'
+permissions:
+  contents: read
+jobs:
+  local-scenario-evidence:
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: backend
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.13'
+          cache: pip
+          cache-dependency-path: backend/requirements.txt
+      - run: python -m pip install -r requirements.txt
+      - name: Run local S01-S12 scenario evidence and flag missing/skip coverage
+        run: python -m scripts.masterdocs_scenario_report > masterdocs_local_scenario_evidence.json
+      - name: Print explicit evidence with verification limits
+        run: cat masterdocs_local_scenario_evidence.json
+      - name: Upload local test evidence (NOT a cloud-acceptance certificate)
+        uses: actions/upload-artifact@v4
+        with:
+          name: masterdocs-local-scenarios
+          path: backend/masterdocs_local_scenario_evidence.json
+          retention-days: 7
