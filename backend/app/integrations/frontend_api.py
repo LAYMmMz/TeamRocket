@@ -9,7 +9,7 @@ from __future__ import annotations
 from datetime import datetime, timedelta, timezone
 from typing import Literal
 
-from fastapi import APIRouter, Depends, Header, HTTPException, Query
+from fastapi import APIRouter, Depends, Header, HTTPException, Query, Request
 from pydantic import BaseModel, Field
 from sqlalchemy import select
 
@@ -416,3 +416,52 @@ def sync_status(principal=Depends(require("sync:manage")),
     return {"queue_depth": queue_depth, "last_receipt_at": None,
             "state": "pending" if queue_depth else "idle",
             "counts": counts}
+
+@router.post("/sync/run")
+def sync_authorized_mission(
+    mission_id: str,
+    request: Request,
+    principal=Depends(require("sync:manage")),
+    store=Depends(get_store),
+    settings=Depends(get_settings),
+):
+    """Manual cloud sync using the request's verified, short-lived user session.
+
+    Requires a server-approved JWT, explicit mission authorization and a
+    configured *fixed* Supabase RPC URL. This endpoint does not persist tokens,
+    start automatic sync, accept URLs from clients, or expose outbox contents.
+    """
+    from app.sync.worker import HTTPReceiptTransport, SyncWorker
+
+    authorized(principal, mission_id)
+    if not settings.sync_rpc_url or not settings.supabase_anon_key:
+        raise AppError(503, "cloud_not_configured",
+                       "Cloud synchronization endpoint is not configured")
+    # current_principal already verified this Bearer token's signature, issuer,
+    # audience and trusted role/mission claims for this request.
+    authorization = request.headers.get("authorization") or ""
+    if not authorization.lower().startswith("bearer "):
+        raise AppError(401, "authentication_required", "Bearer session required")
+    bearer = authorization.split(" ", 1)[1].strip()
+    # Production cloud auth must be a real Supabase JWT, never an offline grant
+    # or locally signed development/test token.
+    if principal.offline:
+        principal.deny("sync:online_session_required", mission_id=mission_id)
+    import jwt
+    try:
+        signing_algorithm = jwt.get_unverified_header(bearer).get("alg")
+    except (jwt.PyJWTError, ValueError):
+        raise AppError(401, "invalid_session", "Invalid session")
+    if signing_algorithm not in {"RS256", "ES256"}:
+        raise AppError(403, "cloud_session_required",
+                       "Cloud sync requires a Supabase asymmetric-signed JWT")
+    transport = HTTPReceiptTransport(settings)
+    transport.access_token = bearer
+    result = SyncWorker(
+        store, transport, settings.sync_max_attempts, settings.sync_batch_size
+    ).run_once(mission_ids=[mission_id])
+    store.audit(
+        "sync.run_user_session", principal.user_id, mission_id=mission_id,
+        details={"delivered": result["delivered"], "failed": result["failed"]},
+    )
+    return result
