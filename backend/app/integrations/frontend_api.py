@@ -16,6 +16,7 @@ from sqlalchemy import select
 from app.auth.dependencies import require
 from app.core.dependencies import get_settings, get_store
 from app.core.errors import AppError
+from app.measurements.models import Measurement
 
 router = APIRouter(prefix="/api/v1", tags=["RocketPulse frontend compatibility"])
 MISSION = "DEMO-01"
@@ -49,6 +50,30 @@ DOMAIN_STORE = {
     "medicalops": ("incident",),
 }
 
+
+
+@router.post("/measurements", status_code=201)
+def ingest_synthetic_measurement(
+    record: "Measurement",
+    principal=Depends(require("measurements:write")),
+    store=Depends(get_store),
+    settings=Depends(get_settings),
+):
+    """V1 synthetic-only ingestion for an explicit end-to-end test.
+
+    The authoritative measurement service performs provenance validation,
+    encrypted SQLite persistence and outbox enqueue; it never writes from
+    the browser directly to Supabase.
+    """
+    from app.measurements.service import ingest
+    principal.require_mission(record.mission_id)
+    if not record.is_synthetic or record.source_type != "SIMULATED":
+        raise AppError(403, "synthetic_test_only",
+                       "This integration test accepts synthetic measurements only")
+    if settings.environment not in {"development", "test"}:
+        raise AppError(403, "synthetic_data_disabled",
+                       "Synthetic test ingestion is disabled in production")
+    return ingest(record, store, settings, principal.user_id)
 
 def now_iso():
     return datetime.now(timezone.utc).isoformat()
