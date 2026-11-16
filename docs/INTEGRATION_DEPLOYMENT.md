@@ -18,11 +18,11 @@ This branch includes protected FastAPI `/api/v1` compatibility endpoints used by
 
 ## Vercel frontend deployment — correct project and proxy
 
-The active Vercel project is [team-rocket-rocket-pulse-front-end](https://vercel.com/laymmmzs-projects/team-rocket-rocket-pulse-front-end), configured with Root Directory `frontend`. The older `rocketpulse` project points to the obsolete `RocketPulse FrontEnd` directory and currently reports a failed build. Do not use that older project.
+The verified active Vercel project is [teamrocket-rocketpulse](https://vercel.com/laymmmzs-projects/teamrocket-rocketpulse), created in the authorized `laymmmzs-projects` workspace and linked to `LAYMmMz/TeamRocket` with Root Directory `frontend` (Vite, Node 24, `npm ci`, `npm run build`, `dist`). Historical GitHub reports mentioned other Vercel projects, but those are **not present in the currently connected Vercel workspace**. Use the new project linked above, not an older 404 URL.
 
 `frontend/vercel.json` sends same-origin `/api/v1/*` requests to the Railway staging FastAPI URL; the React client uses `/api/v1` for hosted builds by default when `VITE_API_BASE_URL` is unset. Local development still defaults to `http://localhost:8000/api/v1`. The proxy avoids cross-origin requests from the Vercel browser but **does not remove backend authentication**. Keep JWT verification and mission-grant checks enabled.
 
-For the active Vercel project, set the following **public browser-build variables** under Settings → Environment Variables (Preview only while testing):
+The following **public browser-build variables** have been configured through the Vercel API on **Preview only**, scoped to branch `feat/frontend-backend-api-integration`:
 
 ```dotenv
 VITE_DATA_MODE=api
@@ -31,9 +31,9 @@ VITE_SUPABASE_URL=https://ziecxjoeljxoocixejtz.supabase.co
 VITE_SUPABASE_PUBLISHABLE_KEY=<your public sb_publishable key>
 ```
 
-Then redeploy the integration branch preview. No `NEXT_PUBLIC_` variables are consumed by this Vite app. Do not use `VITE_DATA_MODE=api` in Production until the authorized-user flow and seven dashboards have been reviewed. Without environment variables, the frontend intentionally remains in deterministic demo mode, even when the proxy is present.
+The Preview deployment was created and reached `READY` for integration commit `235ab2a7e75bb38e3ddcaee01f0974ca01b52622`. Its URL is `https://teamrocket-rocketpulse-j8b3yead5-laymmmzs-projects.vercel.app`. A real fetch to Preview `/` returned HTTP 200. The same-origin Vercel rewrite `/api/health` returned HTTP 200 JSON from Railway: `environment=test`, `local_schema_version=2`, `cloud_sync_configured=false`. An authenticated API request was not verified without a valid authorized test user JWT. Production remains on Vite `demo` mode. No `NEXT_PUBLIC_` variables are consumed by this Vite app. Do not use `VITE_DATA_MODE=api` in Production until the authorized-user flow and seven dashboards have been reviewed. Without environment variables, the frontend intentionally remains in deterministic demo mode, even when the proxy is present.
 
-The Vercel app integration was reported installed by the user but its account-management actions were not available to the assistant in that session, so these dashboard settings have **not** been remotely applied or verified.
+Vercel team access was authorized in a later session. Project creation, environment variable settings, and Preview deployment were successfully completed and verified through the Vercel integration.
 
 ## Credentials: do NOT paste secrets into GitHub code, chat, commits, or Vite variables
 
