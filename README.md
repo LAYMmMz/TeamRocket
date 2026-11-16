@@ -1,99 +1,163 @@
-# TeamRocket — RocketPulse
+# RocketPulse | TeamRocket 🚀
 
-Astronaut health-monitoring research prototype with synthetic data. This repository consolidates the team's frontend, backend and database branches. It is not NASA-certified software or a completed clinical system.
+**NASA Space Apps Challenge — Astronaut Health-Monitoring Research Prototype**
 
-## Where each part belongs
+[**🌐 Open the Judges' Live Demo (no login)**](https://teamrocket-rocketpulse.vercel.app) · [**📊 Live Synthetic API Sample**](https://teamrocket-rocketpulse.vercel.app/api/v1/public/missions/DEMO-01/command?astronaut_id=CREW-01) · [**🩺 API Health**](https://teamrocket-rocketpulse.vercel.app/api/health) · [**⚙️ Deployment Guide**](#deploy-the-integrated-application) · [**🔐 Data Safety**](#data-protection-and-honest-scope)
 
-| Directory | Contents |
+> **Judge notice:** The app is a *working three-service integration* for a **fictional, synthetic mission**: React on Vercel reads an approved dataset from Supabase through a FastAPI service on Railway. It is **not** NASA operational telemetry, a medical device, or a completed validation of all proposed clinical features. Public visitors do not need a login and cannot edit the database.
+
+## Start here: judge walkthrough
+
+1. **[Open RocketPulse](https://teamrocket-rocketpulse.vercel.app/command)** — the command dashboard and 3D crew explorer are public.
+2. Select a fictional crew member (**CREW-01** through **CREW-04**). View the **heart rate, SpO₂, respiration and blood-pressure** samples pulled from Supabase, plus the historical trend graph.
+3. Explore the other dashboards, **Health Systems → Cabin** (the synthetic CO₂ reading) and the architecture shown in **Integration**. Reference/scenario content is labelled as demonstrative; some proposed modules are not cloud-backed.
+4. **[Open the JSON API in another tab](https://teamrocket-rocketpulse.vercel.app/api/v1/public/missions/DEMO-01/command?astronaut_id=CREW-01)** and verify the source marker `"data_source": "supabase-approved-synthetic"`, `"is_synthetic": true`, and fictional crew names. This API is reached through the same public Vercel origin as the frontend.
+5. **[Check the backend health endpoint](https://teamrocket-rocketpulse.vercel.app/api/health)**. `status=ok` shows the API is running; it is **not** proof of private cloud writes.
+
+**Stable submission URL:** https://teamrocket-rocketpulse.vercel.app
+
+## How the three services connect
+
+```text
+Judges' browser (no application login)
+    |
+    v
+Vercel — React + TypeScript + Vite + seven dashboard views
+    |   VITE_DATA_MODE=public, /api/v1 same-origin rewrites
+    v
+Railway — FastAPI  /api/v1/public/*   (GET-only allowlist)
+    |   Public Supabase publishable key / anonymous RLS
+    v
+Supabase — TeamRocketV2Database (PostgreSQL)
+    |   public.rocketpulse_public_demo_samples
+    |   428 fictional measurements, explicitly approved for anonymous reads
+    +--> separate protected clinical tables and privileged RPC (NOT public)
+
+Private, authenticated workflows (separate path):
+    FastAPI -> encrypted local SQLite /data -> durable outbox
+       -> mission-authorized Supabase RPC when a permitted session requests sync
+```
+
+**Verified in the integration build (November 16, 2026):** The public command API returned **HTTP 200** with actual Supabase-approved synthetic readings; the trends endpoint returned **24 historical time points**; the Cabin domain endpoint returned **HTTP 200**, including a synthetic **650 ppm CO₂** sample. The 428-row table's anonymous visibility was confirmed through the Supabase SQL Editor. These samples are fixed demonstrative readings, **not live sensors**.
+
+### Repository map
+
+| Path | Purpose |
 | --- | --- |
-| `frontend/` | Active RocketPulse React + TypeScript + Vite interface from main |
-| `backend/` | Integrated Python/FastAPI application from the backend branch |
-| `backend/offline/migrations/` | Local SQLite migration scripts used by the backend |
-| `supabase/migrations/` | Database team's forward cloud RPC migrations; prerequisites are incomplete |
-| `supabase/rollbacks/` | Manual rollback scripts, never run as forward migrations |
-| `supabase/queries/` | Read-only schema inspection SQL |
-| `supabase/legacy/` | Original partial schema for reference; not a deployment baseline |
-| `docs/database/` | Database exports, mappings, contracts and teammate test notes |
-| `docs/schema-handoff.json` | Backend's existing schema manifest |
-| `database/docs/` | Original schema proposal, preserved for reconciliation |
-| `archive/` | Alternative frontend, earlier database prototype and patch packages |
+| [`frontend/`](frontend/) | Seven RocketPulse dashboards, 3D crew scene, Vite application, Vercel rewrites |
+| [`frontend/src/lib/api.ts`](frontend/src/lib/api.ts) | Read-only public routes vs. private JWT-required routes |
+| [`frontend/vercel.json`](frontend/vercel.json) | Proxy `/api/v1/*` and `/api/health` to Railway; SPA fallback |
+| [`backend/`](backend/) | FastAPI, offline encrypted SQLite store, auth, queue, tests |
+| [`backend/app/integrations/public_demo_api.py`](backend/app/integrations/public_demo_api.py) | Public `GET` API: approved synthetic Supabase rows only |
+| [`backend/Dockerfile`](backend/Dockerfile) / [`railway.json`](railway.json) | Docker and persistent backend deployment |
+| [`supabase/manual/20261116_public_demo_feed.sql`](supabase/manual/20261116_public_demo_feed.sql) | One-time 428-row synthetic feed, anonymous SELECT policy, RLS |
+| [`supabase/migrations/`](supabase/migrations/) | Historical cloud migrations; **not a complete fresh project bootstrap** |
+| [`docs/PUBLIC_SUPABASE_DEMO.md`](docs/PUBLIC_SUPABASE_DEMO.md) | Full public-data threat boundaries and database verification |
+| [`docs/INTEGRATION_DEPLOYMENT.md`](docs/INTEGRATION_DEPLOYMENT.md) | Authenticated private sync and legacy integration details |
+| [`docs/REPOSITORY_ORGANIZATION.md`](docs/REPOSITORY_ORGANIZATION.md) | Consolidated branches and archived components |
 
-See [the consolidation record](docs/REPOSITORY_ORGANIZATION.md) for source branches and cleanup decisions. Use the active frontend for Vercel. Do not merge archived app files into it by filename: they have different contracts.
+## Deploy the integrated application
 
-## Frontend: local setup
+> **How to host all three parts:** Vercel runs the **frontend**, Railway runs the **FastAPI backend** and persistent SQLite, and Supabase hosts the **cloud PostgreSQL database**. Vercel itself does not execute the FastAPI container or host PostgreSQL. The `frontend/vercel.json` rewrite connects them under **one public web address**.
 
-Use Node.js 24.x. From the repository root in PowerShell:
+### 1. GitHub repository
+
+Use [**LAYMmMz/TeamRocket**](https://github.com/LAYMmMz/TeamRocket). The currently published integration source is `feat/frontend-backend-api-integration` (the repository's current default branch). Do not deploy files from `archive/` or assume a historical `main` branch contains this integration. Keep backend and frontend changes together in the same review workflow and check GitHub Actions before publishing.
+
+### 2. Supabase database (existing TeamRocket project)
+
+- Project: **TeamRocketV2Database**, ID `ziecxjoeljxoocixejtz`.
+- Endpoint: `https://ziecxjoeljxoocixejtz.supabase.co`.
+- **This existing project already has the reviewed public feed installed.** For a different/new project, the project owner must review and execute [`supabase/manual/20261116_public_demo_feed.sql`](supabase/manual/20261116_public_demo_feed.sql) in that project's SQL Editor. This script creates/seeds **only** the isolated public demonstration table; it does **not** recreate all protected clinical tables or authentication configuration.
+- Confirm its final audit: `visible_to_anonymous=428` or more; anonymous `SELECT` permitted, anonymous `INSERT`, `UPDATE`, `DELETE` denied; RLS enabled. Never change the privileged `health_logs` or `ingest_sync_event` policies to make public demos work.
+- **Never put a Supabase `service_role`/secret key or database password in Vercel's `VITE_*` environment variables, public code, screenshots or commit history.**
+
+### 3. Railway backend (Docker + persistent data)
+
+Existing instance: [**TeamRocket-Astronaut-Health**](https://railway.com/) → staging → `teamrocket-fastapi`.
+
+Create/link a Railway service from this GitHub repository, deploying the integration branch. Configure:
+
+| Railway setting | Value |
+| --- | --- |
+| Builder | **Dockerfile**, path `backend/Dockerfile` |
+| Docker build context | Repository root (Dockerfile copies `backend/` and `docs/schema-handoff.json`) |
+| Health check | `/api/health` |
+| Public service URL (current) | `https://teamrocket-fastapi-staging.up.railway.app` |
+| Durable volume | Mount `/data` for encrypted SQLite and attachments |
+| `APP_ENV` | `test` for the *existing synthetic judge staging service*; do not label it a clinical production backend |
+| `SQLITE_PATH` | `/data/offline.db` |
+| `DEV2_DATABASE_URL` | `sqlite:////data/dev2_clinical.db` |
+| `ATTACHMENTS_ROOT` | `/data/attachments` |
+| `SCHEMA_MANIFEST_PATH` | `/srv/docs/schema-handoff.json` |
+| `SUPABASE_URL` | `https://ziecxjoeljxoocixejtz.supabase.co` |
+| `SUPABASE_ANON_KEY` | The project's **public publishable key** (Railway server variable, not a service-role secret) |
+| `SYNC_RPC_URL` | `https://ziecxjoeljxoocixejtz.supabase.co/rest/v1/rpc/ingest_sync_event` (private, mission-authorized sync only) |
+| `SYNC_ACCESS_TOKEN` | **Leave empty** — do not save a user's expiring JWT as a permanent worker secret |
+
+Also set `LOCAL_ENCRYPTION_KEY` (persistent **Fernet** key), `OFFLINE_GRANT_SECRET` (random 32+ characters), and the project's `AUTH_ISSUER`, `AUTH_JWKS_URL`, `AUTH_AUDIENCE=authenticated` for protected APIs. See [the backend setup guide](backend/README.md) for local development. **Do not rotate the Fernet key without an encrypted-data migration.** Keep the Railway service and its volume operational during judging.
+
+### 4. Vercel frontend (public judge link)
+
+Existing project: [**teamrocket-rocketpulse on Vercel**](https://vercel.com/laymmmzs-projects/teamrocket-rocketpulse).
+
+In Vercel, import/connect **`LAYMmMz/TeamRocket`**, use the **current integration/default branch** as Production Branch, and set:
+
+| Vercel setting | Value |
+| --- | --- |
+| Framework Preset | **Vite** |
+| Root Directory | **`frontend`** |
+| Node.js Version | **24.x** |
+| Install Command | **`npm ci`** |
+| Build Command | **`npm run build`** |
+| Output Directory | **`dist`** |
+| Production `VITE_DATA_MODE` | **`public`** — not `demo` or `api` |
+| Production `VITE_API_BASE_URL` | **`/api/v1`** (same-origin proxy) |
+
+`VITE_DATA_MODE=public` bypasses the application's login screen and only calls the **GET-only**, synthetic Supabase-backed `/api/v1/public/*` API. `VITE_DATA_MODE=demo` uses local static browser fixtures (not database-backed); `VITE_DATA_MODE=api` is the **private** JWT-protected mode requiring user login.
+
+Ensure the production domain is **publicly accessible to judges**; if Vercel Deployment Protection redirects visitors to Vercel login, limit protection to previews in **Project Settings → Deployment Protection**. Click **Redeploy** after changing build-time environment variables: Vite embeds them during the build. If the Railway backend URL changes, update [`frontend/vercel.json`](frontend/vercel.json) and redeploy Vercel.
+
+After deployment, submit the **stable production URL**: **https://teamrocket-rocketpulse.vercel.app**, not a temporary preview/build URL.
+
+### 5. Verify the complete judge deployment (no login)
+
+Open these URLs in a private/incognito browser and verify **JSON**, not `index.html`:
+
+| Test | Expected |
+| --- | --- |
+| [App homepage](https://teamrocket-rocketpulse.vercel.app) | RocketPulse dashboard, **no app or Vercel login** |
+| [FastAPI health through Vercel](https://teamrocket-rocketpulse.vercel.app/api/health) | JSON: `status=ok` |
+| [Crew command API](https://teamrocket-rocketpulse.vercel.app/api/v1/public/missions/DEMO-01/command?astronaut_id=CREW-01) | HTTP 200; `data_source=supabase-approved-synthetic` |
+| [Crew trends API](https://teamrocket-rocketpulse.vercel.app/api/v1/public/measurements/trends?astronaut_id=CREW-01) | 24 historical synthetic chart points |
+| [Cabin domain API](https://teamrocket-rocketpulse.vercel.app/api/v1/public/reports/domains/cabin?astronaut_id=CREW-01) | HTTP 200 and synthetic CO₂ sample |
+| Private `/api/v1/missions/DEMO-01/command?astronaut_id=CREW-01` | **401 without Supabase user JWT**; expected |
+| Public `POST /api/v1/public/...` | **405**; public modifications forbidden |
+
+**Troubleshooting:** If a public API URL shows the RocketPulse HTML shell, Vercel deployed the wrong source/branch or lost the `frontend/vercel.json` rewrites. If it returns **503**, check the Supabase feed table, read-only RLS policy, and Railway `SUPABASE_URL`/`SUPABASE_ANON_KEY` rather than exposing private tables. If a browser asks for a login, check `VITE_DATA_MODE=public` and Vercel Deployment Protection.
+
+## Local development and tests
 
 ```powershell
+git clone https://github.com/LAYMmMz/TeamRocket.git
+cd TeamRocket
 cd frontend
-npm.cmd ci
-npm.cmd run check:scope
-npm.cmd run build
-npm.cmd run dev
+npm ci
+npm run check:scope
+npm run build
+npm run dev
 ```
 
-Demo mode is the default. For explicit local configuration, copy `.env.example` to `.env` only if no local .env already exists. On macOS/Linux, use `npm` instead of `npm.cmd`.
+For the **database-connected public** frontend locally, create an untracked `frontend/.env.local` containing `VITE_DATA_MODE=public` and `VITE_API_BASE_URL=/api/v1`. The local Vite server requires a proxy or a running backend; the hosted Vercel proxy is defined by `frontend/vercel.json`. For backend local tests, see [`backend/README.md`](backend/README.md). GitHub Actions runs the frontend build and integration API tests.
 
-## Vercel: deploy the frontend demo
+## Data protection and honest scope
 
-Import `LAYMmMz/TeamRocket` and select:
+- The **public** dataset contains **428 clearly labelled synthetic rows** approved for read-only display. Four fictional crew profiles and historical observations are loaded from Supabase PostgreSQL via Railway, not from clinical tables.
+- **Protected** clinical endpoints, user JWTs, offline sync queue, audit trails, attachments and patient/crew-specific records are **not available** to anonymous judges. The public UI intentionally does not create measurements or acknowledge private alerts.
+- FastAPI also runs an **encrypted local SQLite** store on a Railway volume; the authorized synchronization pathway is separate from public dashboard reads. **Unattended 24/7 private cloud sync is not enabled or verified**; do not claim it is.
+- The app contains seven dashboard views and additional engineering/simulation screens, but some features are research references or UI demonstrations rather than independently accepted medical functions. A passing public JSON read does **not** prove every module, alert, or historical acceptance test has passed.
+- Use this as a **research and educational hackathon prototype**, never as a clinical decision system.
 
-| Setting | Value |
-| --- | --- |
-| Production branch | `main` |
-| Framework | Vite |
-| Root Directory | `frontend` |
-| Install Command | `npm ci` |
-| Build Command | `npm run build` |
-| Output Directory | `dist` |
-| Node.js | 24.x |
-| Environment variable | `VITE_DATA_MODE=demo` |
+---
 
-For an existing project, change its Root Directory from `RocketPulse FrontEnd` to `frontend` before the next deployment. Keep `frontend/vercel.json` for SPA deep-link rewrites. Check all dashboards, assets and a direct refresh of `/command` after deployment.
-
-## Backend: local setup
-
-Use a separate terminal. The backend team used Python 3.13. From the repository root:
-
-```powershell
-cd backend
-py -3.13 -m venv .venv
-.\.venv\Scripts\python.exe -m pip install -r requirements.txt
-.\.venv\Scripts\python.exe dev.py
-```
-
-`dev.py` creates development secrets in a local .env on first run and prints a local development token. Do not commit that file or share the token. Open http://127.0.0.1:8000/docs and http://127.0.0.1:8000/api/health. Read [backend/README.md](backend/README.md) before enabling optional cloud sync.
-
-Run local tests from backend:
-
-```powershell
-.\.venv\Scripts\python.exe run_teamrocket_tests.py
-```
-
-No live Supabase operations were authorized or performed as part of repository organization.
-
-## Integration status
-
-The active frontend expects `/api/v1` and proposed response shapes, while the backend exposes `/api` and its own contracts. Changing only VITE_API_BASE_URL is not sufficient. Authentication, endpoint/response mapping and demo-only sections must be reconciled before enabling `VITE_DATA_MODE=api`.
-
-Vercel serves this frontend. The existing backend uses local SQLite files and a background sync worker, so it needs a runtime with durable local storage; this cleanup does not deploy or adapt it to serverless execution. The Supabase migration set is incomplete for a clean database: see [supabase/README.md](supabase/README.md). Do not run the SQL blindly.
-
-The source manifest lists 47 features, 57 cloud tables, six offline tables and 12 scenarios. Inventory coverage is not evidence that all acceptance criteria pass.
-
-## Working with branches
-
-All five existing branches were included in the consolidation. The consolidation commit preserves their starting commits as parents. This layout is currently on the review branch; main and the original work branches have not been updated. Future changes belong in their component folders on feature branches, then into main through reviewed pull requests.
-
-Historical alternatives are in archive for reference, not automatic deployment. Review this consolidation instead of merging the older layout proposals independently.
-
-## Secrets and generated files
-
-Local databases, the committed offline encryption key, .env.local, Python bytecode, duplicate empty files and obsolete backup copies were excluded from the consolidated tree. Their historical commits remain in Git. Treat the old offline key as exposed; replace it for any reused environment and re-encrypt retained data with an appropriate migration. Inspect historical environment configuration for any private credentials and rotate any that were real. Do not copy old local databases or keys back into the repository.
-
-Git ignores local environment files, databases/keys, caches, dependencies, builds and generated test reports. Keep package-lock.json and .env.example files.
-
-## Verification during consolidation
-
-Frontend: npm ci, check:scope and production build passed on Node 24.22.1. Static image/model blobs were preserved by Git SHA; they were not copied into the local build workspace, so browser/asset rendering was not verified. Vite reported a large JavaScript chunk.
-
-Backend: the local suite on Python 3.12 ran 151 checks: 123 PASS, 21 FAIL, 3 ERROR, 4 BLOCKED. The runtime application and test sources are preserved unchanged from the backend branch. Errors include missing reports `domains` response data; failures include authorization/response expectations. This is a repository cleanup, not completion of those integration fixes. No live Supabase/RLS or deployed-browser test was performed.
+**Team:** [TeamRocket](https://github.com/LAYMmMz/TeamRocket) · **Deployment:** [Vercel](https://vercel.com/laymmmzs-projects/teamrocket-rocketpulse) + [Railway](https://railway.com/) + [Supabase](https://supabase.com/dashboard/project/ziecxjoeljxoocixejtz) · **Data:** approved synthetic only.
