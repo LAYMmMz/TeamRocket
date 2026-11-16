@@ -117,6 +117,17 @@ class FrontendHTTPTests(unittest.TestCase):
         record = self.client.app.state.store.get("symptom_report", body["event_id"])
         self.assertEqual(record["source_type"], "SIMULATED")
 
+    def test_manual_cloud_sync_requires_privileged_user_and_configuration(self):
+        endpoint = "/api/v1/sync/run?mission_id=DEMO-01"
+        # No JWT is rejected; crew must not trigger cloud writes.
+        self.assertEqual(self.client.post(endpoint).status_code, 401)
+        self.assertEqual(
+            self.client.post(endpoint, headers=self.crew).status_code, 403
+        )
+        # A scoped admin still cannot sync when the remote RPC is disabled.
+        result = self.client.post(endpoint, headers=self.admin)
+        self.assertEqual(result.status_code, 503, result.text)
+
     def test_sync_status_is_privileged(self):
         self.assertEqual(self.client.get("/api/v1/sync/status", headers=self.crew).status_code, 403)
         r = self.client.get("/api/v1/sync/status", headers=self.admin)
