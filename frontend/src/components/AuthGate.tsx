@@ -1,7 +1,8 @@
 import {useEffect,useState} from 'react';
+import type {ReactNode} from 'react';
 import {authConfigured,hasSession,signIn,signOut} from '../lib/auth';
 
-export function AuthGate({children}:{children:React.ReactNode}){
+export function AuthGate({children}:{children:ReactNode}){
  const [authorized,setAuthorized]=useState(hasSession);
  const [email,setEmail]=useState('');
  const [password,setPassword]=useState('');
