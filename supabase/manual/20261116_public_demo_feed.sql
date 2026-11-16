@@ -68,7 +68,7 @@ WITH synthetic_crew AS (
     FROM generate_series(1,4) AS i
 ), generated AS (
     SELECT
-        'RP-PUBLIC-' || c.crew || '-' || m.metric_code || '-' ||
+        'RP-PUBLIC-' || c.crew || '-' || upper(m.metric_code) || '-' ||
             lpad(t.slot::text,2,'0') AS event_id,
         c.crew AS astronaut_code,
         m.metric_code,
