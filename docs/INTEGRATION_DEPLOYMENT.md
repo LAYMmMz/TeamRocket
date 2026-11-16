@@ -94,3 +94,19 @@ The current Supabase connector account has no access to the confirmed TeamRocket
 - Alert acknowledgement is handled in the compatibility adapter and requires careful clinical workflow/security review before any production claim.
 - Domain records are intentionally partial; 57-table mapping and clinical validation remain incomplete.
 - The default-branch README's Vercel `main` instructions are stale if `main` does not exist; select the correct branch explicitly.
+
+## No-connector Supabase verification and manual sync
+
+The user can access the correct Supabase SQL Editor even though the ChatGPT Supabase connector cannot list that project. **Do not rerun migrations, edit policies, or expose secret keys to work around connector access.**
+
+1. In Supabase → `TeamRocketV2Database` → SQL Editor → **New query**, copy only the contents of `supabase/queries/live_sync_preflight.sql` and press Run. It is one read-only SELECT returning `teamrocket_live_sync_preflight`.
+2. Confirm the RPC has `security_definer=true`, `anon_can_execute=false`, `authenticated_can_execute=true`, a controlled `search_path`, and no public policies exposing data. Check for at least one eligible `DEMO-01` mission member. Independently review each policy.
+3. Create a **synthetic/test** Supabase Auth user via the Supabase dashboard. Configure the backend-trusted `app_metadata.roles` (`admin` or `flight_surgeon`) and `app_metadata.mission_ids` (`["DEMO-01"]`) using a secure administrative workflow, not browser `user_metadata`. Ensure the same user has a row in `public.mission_members` for `DEMO-01`. Never paste the password or access token in chat.
+4. Once RPC grants, JWT signing algorithm, and mission membership pass review, set **only** the following on the *Railway staging backend*: `SYNC_RPC_URL=https://ziecxjoeljxoocixejtz.supabase.co/rest/v1/rpc/ingest_sync_event`. Keep `SYNC_ACCESS_TOKEN` empty. A stable user JWT is not needed for **manual sync**; the endpoint `POST /api/v1/sync/run?mission_id=DEMO-01` uses a verified, live, short-lived Bearer session from the caller and requires `sync:manage` permission. A CLI/API client must explicitly send that session; the React UI currently does not provide a sync button. The endpoint never stores tokens.
+5. Send **synthetic only** records through authorized FastAPI endpoints. Trigger manual sync, check the result, then **read** the exact event ID from Supabase `sync_receipts` and the destination `health_logs`/`clinical_records`. A 200 from `/api/health` is **not** proof of cloud synchronization; a matching receipt is.
+6. Keep the integration preview gated by Supabase Auth. Public judge access can remain `VITE_DATA_MODE=demo` until a separately reviewed, anonymous **read-only synthetic** endpoint exists.
+
+The backend health endpoint reports `cloud_sync_configured` for the older automatic worker (requires a stored JWT), and `manual_cloud_sync_configured` for the new manual user-session path (requires an RPC URL and public key). Both settings describe **configuration**, not verified remote writes.
+
+**Known risk:** The repository's earlier migration `supabase/migrations/20261115_02_ingest_sync_event_rpc.sql` has an old unguarded seed snippet involving `v_demo_user_id`; do not rerun historical SQL against the existing database. Review the deployed RPC `pg_get_functiondef` and grants instead if the preflight indicates a mismatch.
+
