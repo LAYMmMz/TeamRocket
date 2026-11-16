@@ -2,7 +2,7 @@
 
 Source: uploaded *NASA Astronaut Health Monitoring — Final Development MasterDocs*, 15 November 2026, pp. 10–12.
 
-**Status key:** Every feature is discoverable in the frontend at `/features/Fxx`. This is **not** a claim of integrated completion. All require backend contracts, persistence, role checks and tests.
+**Status key:** Every feature is discoverable in the frontend at `/features/Fxx`. This is **not** a claim of integrated completion. Connected observation reads are available; complete feature acceptance still requires persistence, role checks and tests. See [current alignment and remaining blockers](../../docs/PDF_ALIGNMENT_STATUS.md).
 
 | ID | Feature | Phase | Frontend path |
 |---|---|---|---|

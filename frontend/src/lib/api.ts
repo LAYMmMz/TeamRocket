@@ -3,8 +3,8 @@ import type {Alert,CaseRecord,CommandSnapshot,TrendPoint} from './types';
 
 export const dataMode: 'demo'|'api'|'public' =
  import.meta.env.VITE_DATA_MODE === 'api' ? 'api' :
- import.meta.env.VITE_DATA_MODE === 'public' ? 'public' : 'demo';
-const root=(import.meta.env.VITE_API_BASE_URL||(import.meta.env.DEV?'http://localhost:8000/api/v1':'/api/v1')).replace(/\/$/,'');
+ import.meta.env.VITE_DATA_MODE === 'demo' ? 'demo' : 'public';
+const root=(import.meta.env.VITE_API_BASE_URL||'/api/v1').replace(/\/$/,'');
 // Register the Supabase Auth token provider from your authentication module; keep tokens out of URLs.
 let accessTokenProvider:()=>Promise<string|null>=getAccessToken;
 export function configureAuthTokenProvider(fn:()=>Promise<string|null>){accessTokenProvider=fn;}
@@ -15,19 +15,19 @@ export async function request<T>(path:string,opts:RequestInit={}):Promise<T>{
    throw new Error('Public display is strictly read-only');
  const token=dataMode==='public'?null:await accessTokenProvider();
  const response=await fetch(`${root}${path}`,{...opts,headers:{'Content-Type':'application/json',...(token?{Authorization:`Bearer ${token}`} : {}),...opts.headers}});
- if(!response.ok){let message=`HTTP ${response.status}`;try{const json=await response.json();message=json.detail||json.message||message}catch{}throw new Error(message)}
+ if(!response.ok){let message=`HTTP ${response.status}`;try{const json=await response.json();message=json.detail||json.error?.message||json.message||message}catch{}throw new Error(message)}
  return response.json() as Promise<T>;
 }
 // The public route is a separate strict read-only namespace. Do not send JWTs
 // or change protected endpoint permissions to make public dashboards work.
 function readPath(path:string){return dataMode==='public'?'/public'+path:path;}
 function protectedWrite(){if(dataMode==='public')throw new Error('Read-only public dashboard. Protected operations require an authorized account.');}
-// These are PROPOSED concrete contracts under the PDF's logical API families.
-// Backend must implement/document them in FastAPI OpenAPI. No direct browser SQLite/Supabase SQL.
+// FastAPI contracts. Public reads use only approved synthetic database records.
+// Protected writes require backend authorization; no direct browser SQLite/SQL.
 export const api={
  command:(missionId:string,crewId:string)=>request<CommandSnapshot>(readPath(`/missions/${encodeURIComponent(missionId)}/command?astronaut_id=${encodeURIComponent(crewId)}`)),
  trends:(crewId:string)=>request<TrendPoint[]>(readPath(`/measurements/trends?astronaut_id=${encodeURIComponent(crewId)}&hours=24`)),
- domain:(domainId:string,crewId:string)=>request<CaseRecord[]>(readPath(`/reports/domains/${encodeURIComponent(domainId)}?astronaut_id=${encodeURIComponent(crewId)}`)),
+ domain:(domainId:string,crewId:string,signal?:AbortSignal)=>request<CaseRecord[]>(readPath(`/reports/domains/${encodeURIComponent(domainId)}?astronaut_id=${encodeURIComponent(crewId)}`),{signal}),
  acknowledge:(alertId:string)=>(protectedWrite(),request<Alert>(`/alerts/${encodeURIComponent(alertId)}/acknowledgments`,{method:'POST',headers:{'Idempotency-Key':crypto.randomUUID()},body:JSON.stringify({action:'acknowledge'})})),
  symptom:(body:{astronaut_id:string;symptom_code:string;severity:string;notes:string;event_id:string})=>(protectedWrite(),request<unknown>('/symptoms',{method:'POST',headers:{'Idempotency-Key':body.event_id},body:JSON.stringify({...body,is_synthetic:true})})),
  sync:()=>(protectedWrite(),request<{queue_depth:number;last_receipt_at:string|null;state:string}>('/sync/status')),
