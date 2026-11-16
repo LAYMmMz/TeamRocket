@@ -1,7 +1,20 @@
 # RocketPulse frontend–backend integration (synthetic research prototype)
 
 ## Scope
-This branch includes protected FastAPI `/api/v1` compatibility endpoints used by the active Vite dashboard, Supabase user login (not a service-role client), and a backend container recipe. It does not deploy your infrastructure, set up Supabase, validate the 57-table cloud schema, or pass the older backend's unresolved acceptance suite. Domain2 SQLite fixtures are exposed only for `APP_ENV=development/test` and `DEMO-01`, with synthetic flags. Production must not rely on those fixtures.
+This branch includes protected FastAPI `/api/v1` compatibility endpoints used by the active Vite dashboard, Supabase user login (not a service-role client), and a backend container recipe. The synthetic FastAPI staging service is deployed on Railway, but this does not configure Vercel, validate live Supabase RPC permissions, or pass the older backend's unresolved acceptance suite. Domain2 SQLite fixtures are exposed only for `APP_ENV=development/test` and `DEMO-01`, with synthetic flags. Production must not rely on those fixtures.
+
+## Staging backend already deployed (2026-11-16)
+
+- Railway project: `TeamRocket-Astronaut-Health` (private).
+- Railway environment: `staging`; service: `teamrocket-fastapi`.
+- Public staging endpoint: `https://teamrocket-fastapi-staging.up.railway.app/api/health`.
+- GitHub integration branch: `feat/frontend-backend-api-integration`; Dockerfile at `backend/Dockerfile`, Railway root `railway.json`.
+- Deployment reached Railway status `SUCCESS`, and runtime logs show successful FastAPI startup; no authenticated production end-to-end test has been completed.
+- Persistent 500MB encrypted local SQLite volume mounted at `/data`.
+- `APP_ENV=test`; **not a production environment**. Development/test synthetic-data paths are accessible only with valid authorized JWTs. No Dev1 development signing secret configured.
+- The backend environment includes the **public** Supabase publishable key and the confirmed Supabase project URL; `SYNC_ACCESS_TOKEN` and `SYNC_RPC_URL` are deliberately unset pending live RPC permission review and identity setup. This backend is **not yet writing to Supabase**.
+- Railway staging `CORS_ORIGINS` is currently `http://localhost:5173`; the real Vercel production/preview origin must be added separately. Do not add `*` for convenience.
+- **Before enabling browser API mode**, configure Vercel environment variables and verify Supabase JWT algorithm, role mapping, and mission scope.
 
 ## Credentials: do NOT paste secrets into GitHub code, chat, commits, or Vite variables
 
@@ -37,6 +50,9 @@ A stable key and volume are essential: replacing them loses access to encrypted 
 Optional cloud sync additionally requires `SYNC_RPC_URL` and a short-lived **user** JWT `SYNC_ACCESS_TOKEN`. The current background worker does not refresh the JWT automatically; configure credential refresh or disable sync until a reviewed solution exists. A Supabase service-role key is NOT needed by this frontend adapter and should not be given to it. No migrations are applied automatically.
 
 ## Required Supabase project setup
+
+The current Supabase connector account has no access to the confirmed TeamRocket project. A user-executed read-only SQL report previously showed 65 public tables with RLS enabled and the expected RPC, but not whether `anon` has `EXECUTE` on its `SECURITY DEFINER` function or whether live JWTs satisfy the RPC's membership checks. Run `supabase/queries/sync_security_preflight.sql` in the **correct project** to inspect permissions before enabling writes. Do not apply schema/permission mutations based on table counts alone.
+
 1. Provision Supabase Auth users and server-controlled `app_metadata.roles` using one of `admin`, `flight_surgeon`, `crew`, `mission_control`, or `researcher`, and `app_metadata.mission_ids` such as `["DEMO-01"]`. `user_metadata` is NOT trusted for permission grants.
 2. Verify that your project's token signing algorithm and published JWKS are compatible with FastAPI's existing JWT validation (RS256/ES256). A legacy HS256 project needs a reviewed auth strategy; this code does not accept that mode in online auth.
 3. Complete baseline migrations and RLS reconciliation in an **empty development project** before enabling cloud sync. `supabase/README.md` documents missing prerequisites; the source tree is not a reproducible 57-table baseline.
