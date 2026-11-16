@@ -1,1 +1,16 @@
-{"rewrites":[{"source":"/(.*)","destination":"/index.html"}]}
+{
+  "rewrites": [
+    {
+      "source": "/api/v1/:path*",
+      "destination": "https://teamrocket-fastapi-staging.up.railway.app/api/v1/:path*"
+    },
+    {
+      "source": "/api/health",
+      "destination": "https://teamrocket-fastapi-staging.up.railway.app/api/health"
+    },
+    {
+      "source": "/(.*)",
+      "destination": "/index.html"
+    }
+  ]
+}
