@@ -2,7 +2,7 @@ import {getAccessToken} from './auth';
 import type {Alert,CaseRecord,CommandSnapshot,TrendPoint} from './types';
 
 export const dataMode: 'demo'|'api' = import.meta.env.VITE_DATA_MODE === 'api' ? 'api':'demo';
-const root=(import.meta.env.VITE_API_BASE_URL||'http://localhost:8000/api/v1').replace(/\/$/,'');
+const root=(import.meta.env.VITE_API_BASE_URL||(import.meta.env.DEV?'http://localhost:8000/api/v1':'/api/v1')).replace(/\/$/,'');
 // Register the Supabase Auth token provider from your authentication module; keep tokens out of URLs.
 let accessTokenProvider:()=>Promise<string|null>=getAccessToken;
 export function configureAuthTokenProvider(fn:()=>Promise<string|null>){accessTokenProvider=fn;}
