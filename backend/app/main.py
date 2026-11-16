@@ -120,7 +120,8 @@ def create_app(settings=None):
         allow_headers=[
             "Authorization",
             "Content-Type",
-            "X-Request-ID"
+            "X-Request-ID",
+            "Idempotency-Key"
         ],
     )
 
@@ -382,6 +383,9 @@ def create_app(settings=None):
     from app.domain2.dashboards import router as dev2_dashboard_router
     app.include_router(dev2_analysis_router, prefix="/api")
     app.include_router(dev2_dashboard_router, prefix="/api")
+
+    from app.integrations.frontend_api import router as frontend_api
+    app.include_router(frontend_api)
 
     return app
 
