@@ -117,6 +117,42 @@ class FrontendHTTPTests(unittest.TestCase):
         record = self.client.app.state.store.get("symptom_report", body["event_id"])
         self.assertEqual(record["source_type"], "SIMULATED")
 
+    def test_v1_synthetic_measurement_ingest_is_scoped_and_safe(self):
+        payload = {
+            "event_id": "synthetic-v1-ingest-test-001",
+            "mission_id": "DEMO-01",
+            "astronaut_id": "CREW-01",
+            "metric": "heart_rate",
+            "value": 72,
+            "unit": "bpm",
+            "source_type": "SIMULATED",
+            "is_synthetic": True,
+            "measured_at": datetime.now(timezone.utc).isoformat(),
+            "quality": "VALID",
+            "verification": "UNVERIFIED",
+            "source_reference": "rocketpulse-end-to-end-test",
+            "source_revision": "v1"
+        }
+        url = "/api/v1/measurements"
+        self.assertEqual(self.client.post(url, json=payload).status_code, 401)
+        self.assertEqual(self.client.post(
+            url, json=payload, headers=self.headers("crew", ["OTHER"])
+        ).status_code, 403)
+        unsafe = dict(payload, source_type="REAL", is_synthetic=False)
+        self.assertEqual(self.client.post(url, json=unsafe, headers=self.admin).status_code, 403)
+        response = self.client.post(url, json=payload, headers=self.admin)
+        self.assertEqual(response.status_code, 201, response.text)
+        self.assertEqual(response.json()["measurement"]["event_id"], payload["event_id"])
+        self.assertIsNone(self.client.app.state.store.receipt("measurement", payload["event_id"]))
+        command = self.client.get(
+            "/api/v1/missions/DEMO-01/command?astronaut_id=CREW-01",
+            headers=self.crew
+        )
+        self.assertEqual(command.status_code, 200, command.text)
+        self.assertTrue(any(
+            x["event_id"] == payload["event_id"] for x in command.json()["vitals"]
+        ))
+
     def test_supported_outbox_kind_receipt_and_unsupported_audit_retained(self):
         """Prove matching synthetic receipts, not a live Supabase write."""
         from app.sync.worker import MemoryReceiptTransport, SyncWorker
