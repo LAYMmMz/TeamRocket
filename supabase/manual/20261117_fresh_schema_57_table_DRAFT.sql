@@ -59,10 +59,11 @@ ALTER TABLE public."roles" ENABLE ROW LEVEL SECURITY;
 
 -- Identity / missions / devices
 CREATE TABLE IF NOT EXISTS public."user_role_assignments" (
-    "user_id" uuid,
-    "role_id" uuid,
+    "id" uuid NOT NULL DEFAULT gen_random_uuid(),
+    "user_id" uuid NOT NULL,
+    "role_id" uuid NOT NULL,
     "mission_id" uuid,
-    CONSTRAINT "user_role_assignments_pkey" PRIMARY KEY ("user_id","role_id","mission_id")
+    CONSTRAINT "user_role_assignments_pkey" PRIMARY KEY ("id")
 );
 ALTER TABLE public."user_role_assignments" ENABLE ROW LEVEL SECURITY;
 
@@ -443,7 +444,7 @@ CREATE TABLE IF NOT EXISTS public."personal_dose_records" (
     "id" uuid NOT NULL DEFAULT gen_random_uuid(),
     "astronaut_id" uuid,
     "dosimeter_id" text,
-    "dose_quantity" numeric,
+    "dose_quantity" text,
     "value" numeric,
     "unit" text,
     "interval" text,
@@ -847,6 +848,7 @@ CREATE TABLE IF NOT EXISTS public."attachments" (
 ALTER TABLE public."attachments" ENABLE ROW LEVEL SECURITY;
 
 -- These FKs should be executed only after checking existing live-project column types.
+-- Mission assignment may be NULL for global user roles, so join uses a surrogate UUID PK.
 -- On fresh DB this enforces relational integrity, without cascading history deletions.
 ALTER TABLE public."mission_crew" ADD CONSTRAINT "fk_mission_crew_mission_id" FOREIGN KEY ("mission_id") REFERENCES public."missions" ("id") ON DELETE RESTRICT;
 ALTER TABLE public."mission_crew" ADD CONSTRAINT "fk_mission_crew_astronaut_id" FOREIGN KEY ("astronaut_id") REFERENCES public."astronauts" ("id") ON DELETE RESTRICT;
@@ -891,6 +893,7 @@ ALTER TABLE public."fluid_balance_logs" ADD CONSTRAINT "fk_fluid_balance_logs_as
 ALTER TABLE public."medication_administrations" ADD CONSTRAINT "fk_medication_administrations_astronaut_id" FOREIGN KEY ("astronaut_id") REFERENCES public."astronauts" ("id") ON DELETE RESTRICT;
 ALTER TABLE public."health_alerts" ADD CONSTRAINT "fk_health_alerts_astronaut_id" FOREIGN KEY ("astronaut_id") REFERENCES public."astronauts" ("id") ON DELETE RESTRICT;
 ALTER TABLE public."health_alerts" ADD CONSTRAINT "fk_health_alerts_location_id" FOREIGN KEY ("location_id") REFERENCES public."mission_locations" ("id") ON DELETE RESTRICT;
+ALTER TABLE public."health_alerts" ADD CONSTRAINT "fk_health_alerts_rule_id" FOREIGN KEY ("rule_id") REFERENCES public."alert_rules" ("id") ON DELETE RESTRICT;
 ALTER TABLE public."alert_events" ADD CONSTRAINT "fk_alert_events_alert_id" FOREIGN KEY ("alert_id") REFERENCES public."health_alerts" ("id") ON DELETE RESTRICT;
 ALTER TABLE public."alert_evidence" ADD CONSTRAINT "fk_alert_evidence_alert_id" FOREIGN KEY ("alert_id") REFERENCES public."health_alerts" ("id") ON DELETE RESTRICT;
 ALTER TABLE public."medical_exam_schedule" ADD CONSTRAINT "fk_medical_exam_schedule_astronaut_id" FOREIGN KEY ("astronaut_id") REFERENCES public."astronauts" ("id") ON DELETE RESTRICT;
