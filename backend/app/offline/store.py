@@ -458,7 +458,7 @@ class Store:
                     + ",".join("?" for _ in kinds) + ")"
                 )
                 args += list(kinds)
-query += (
+            query += (
                 " ORDER BY priority ASC,created_at ASC,queue_id ASC "
                 "LIMIT ?"
             )
