@@ -282,6 +282,9 @@ def create_app(settings=None):
                 settings.sync_rpc_url
                 and settings.sync_access_token
             ),
+            "manual_cloud_sync_configured": bool(
+                settings.sync_rpc_url and settings.supabase_anon_key
+            ),
             "prototype": True,
         }
 
