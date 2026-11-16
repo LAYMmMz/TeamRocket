@@ -391,8 +391,10 @@ def create_app(settings=None):
 
     from app.integrations.frontend_api import router as frontend_api
     from app.integrations.public_demo_api import router as public_demo_api
+    from app.integrations.clinical_evidence import router as clinical_evidence_api
     app.include_router(frontend_api)
     app.include_router(public_demo_api)
+    app.include_router(clinical_evidence_api)
 
     return app
 

@@ -27,6 +27,8 @@ function protectedWrite(){if(dataMode==='public')throw new Error('Read-only publ
 export const api={
  command:(missionId:string,crewId:string)=>request<CommandSnapshot>(readPath(`/missions/${encodeURIComponent(missionId)}/command?astronaut_id=${encodeURIComponent(crewId)}`)),
  trends:(crewId:string)=>request<TrendPoint[]>(readPath(`/measurements/trends?astronaut_id=${encodeURIComponent(crewId)}&hours=24`)),
+ examinationEvidence:(crewId:string,signal?:AbortSignal)=>request<CaseRecord[]>(`/clinical/examinations/${encodeURIComponent(crewId)}?mission_id=DEMO-01`,{signal}),
+ laboratoryEvidence:(crewId:string,signal?:AbortSignal)=>request<CaseRecord[]>(`/clinical/laboratory/${encodeURIComponent(crewId)}?mission_id=DEMO-01`,{signal}),
  domain:(domainId:string,crewId:string,signal?:AbortSignal)=>request<CaseRecord[]>(readPath(`/reports/domains/${encodeURIComponent(domainId)}?astronaut_id=${encodeURIComponent(crewId)}`),{signal}),
  acknowledge:(alertId:string)=>(protectedWrite(),request<Alert>(`/alerts/${encodeURIComponent(alertId)}/acknowledgments`,{method:'POST',headers:{'Idempotency-Key':crypto.randomUUID()},body:JSON.stringify({action:'acknowledge'})})),
  symptom:(body:{astronaut_id:string;symptom_code:string;severity:string;notes:string;event_id:string})=>(protectedWrite(),request<unknown>('/symptoms',{method:'POST',headers:{'Idempotency-Key':body.event_id},body:JSON.stringify({...body,is_synthetic:true})})),
