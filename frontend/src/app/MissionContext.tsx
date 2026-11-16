@@ -24,6 +24,7 @@ export function MissionProvider({children}:{children:ReactNode}){
  const [remoteTrends,setRemoteTrends]=useState<TrendPoint[]>([]);
  const [apiError,setApiError]=useState<string|null>(null);
  const [tick,setTick]=useState(0);
+ useEffect(()=>{const update=()=>setTick(v=>v+1);window.addEventListener('rocketpulse-auth-changed',update);return()=>window.removeEventListener('rocketpulse-auth-changed',update)},[]);
  const isDemo=dataMode==='demo';
  useEffect(()=>{localStorage.setItem('astrovitals-modules',JSON.stringify(enabledModules))},[enabledModules]);
  useEffect(()=>{if(isDemo)return;let cancelled=false; const load=async()=>{
