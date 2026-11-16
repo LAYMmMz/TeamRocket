@@ -416,7 +416,7 @@ class Store:
 
     def claim_batch(
         self, limit, mission_ids=None,
-        lease_seconds=60, max_attempts=5
+        lease_seconds=60, max_attempts=5, kinds=None
     ):
         now = time.time()
         with self.transaction() as db:
@@ -450,7 +450,15 @@ class Store:
                     + ",".join("?" for _ in mission_ids) + ")"
                 )
                 args += list(mission_ids)
-            query += (
+            if kinds is not None:
+                if not kinds:
+                    return []
+                query += (
+                    " AND q.kind IN ("
+                    + ",".join("?" for _ in kinds) + ")"
+                )
+                args += list(kinds)
+query += (
                 " ORDER BY priority ASC,created_at ASC,queue_id ASC "
                 "LIMIT ?"
             )
