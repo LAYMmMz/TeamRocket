@@ -10,7 +10,7 @@
 
 The specification covers **47 features, seven dashboards, 12 monitoring domains, five hazards, 57 logical cloud tables, six SQLite tables and 12 scenarios**. See the [complete feature matrix](frontend/docs/FEATURE_MATRIX.md), [database-read changes and remaining acceptance blockers](docs/PDF_ALIGNMENT_STATUS.md), and the application's **Feature Status** menu (`/coverage`).
 
-Database mode now requests selected-crew records for dashboard panels, the body explorer and feature pages. Missing records stay unavailable. Undefined medical indices are excluded; they cannot substitute for method-specific laboratory or examination evidence. Public visitors can read approved synthetic data but cannot execute protected clinical writes or sync. The 47 feature entries are not a claim that all 47 clinical workflows have passed acceptance.
+Database mode now requests selected-crew records for dashboard panels, the body explorer and feature pages. Missing records stay unavailable. Undefined medical indices are excluded; they cannot substitute for method-specific laboratory or examination evidence. Public visitors can read approved synthetic data but cannot execute protected clinical writes or sync. Public mission-day, incident counts, device health and local sync state are not supplied as verified operational telemetry. The 47 feature entries are not a claim that all 47 clinical workflows have passed acceptance.
 
 ## Start here: judge walkthrough
 
