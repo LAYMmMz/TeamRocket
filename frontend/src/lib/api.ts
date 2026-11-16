@@ -23,6 +23,15 @@ export const api={
  acknowledge:(alertId:string)=>request<Alert>(`/alerts/${encodeURIComponent(alertId)}/acknowledgments`,{method:'POST',headers:{'Idempotency-Key':crypto.randomUUID()},body:JSON.stringify({action:'acknowledge'})}),
  symptom:(body:{astronaut_id:string;symptom_code:string;severity:string;notes:string;event_id:string})=>request<unknown>('/symptoms',{method:'POST',headers:{'Idempotency-Key':body.event_id},body:JSON.stringify({...body,is_synthetic:true})}),
  sync:()=>request<{queue_depth:number;last_receipt_at:string|null;state:string}>('/sync/status'),
+ createSyntheticMeasurement:(eventId:string,measuredAt:string)=>request<{measurement:{event_id:string;mission_id:string;is_synthetic:boolean}}>(
+   '/measurements',{method:'POST',headers:{'Idempotency-Key':eventId},
+   body:JSON.stringify({
+     event_id:eventId,mission_id:'DEMO-01',astronaut_id:'CREW-01',
+     metric:'heart_rate',value:72,unit:'bpm',
+     source_type:'SIMULATED',is_synthetic:true,measured_at:measuredAt,
+     quality:'VALID',verification:'UNVERIFIED',
+     source_reference:'rocketpulse-end-to-end-test',source_revision:'v1'
+   })}),
  runSync:(missionId:string)=>request<{
    delivered:number;failed:number;queue:{counts:Record<string,number>}
  }>(`/sync/run?mission_id=${encodeURIComponent(missionId)}`,{method:'POST'})
