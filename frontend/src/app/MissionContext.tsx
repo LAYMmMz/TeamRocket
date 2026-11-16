@@ -8,7 +8,7 @@ const DEFAULT_MODULES=['command','individual','examinations','environment','labo
 interface ContextValue{
  astronautId:string;setAstronautId:(v:string)=>void; role:Role;setRole:(v:Role)=>void; scenario:string;setScenario:(v:string)=>void;
  snapshot:CommandSnapshot;trends:TrendPoint[];alerts:Alert[];is3D:boolean;set3D:(v:boolean)=>void;
- isDemo:boolean; apiError:string|null;refresh:()=>void;acknowledge:(id:string)=>Promise<void>;
+ isDemo:boolean;isPublic:boolean; apiError:string|null;refresh:()=>void;acknowledge:(id:string)=>Promise<void>;
  enabledModules:string[];toggleModule:(id:string)=>void; simulatedDisconnected:boolean;setSimulatedDisconnected:(b:boolean)=>void;
 }
 const MissionContext=createContext<ContextValue|null>(null);
@@ -26,6 +26,7 @@ export function MissionProvider({children}:{children:ReactNode}){
  const [tick,setTick]=useState(0);
  useEffect(()=>{const update=()=>setTick(v=>v+1);window.addEventListener('rocketpulse-auth-changed',update);return()=>window.removeEventListener('rocketpulse-auth-changed',update)},[]);
  const isDemo=dataMode==='demo';
+ const isPublic=dataMode==='public';
  useEffect(()=>{localStorage.setItem('astrovitals-modules',JSON.stringify(enabledModules))},[enabledModules]);
  useEffect(()=>{if(isDemo)return;let cancelled=false; const load=async()=>{
   try{const [snapshot,points]=await Promise.all([api.command('DEMO-01',astronautId),api.trends(astronautId)]);if(!cancelled){setRemote(snapshot);setRemoteTrends(points);setApiError(null)}}
@@ -36,9 +37,9 @@ export function MissionProvider({children}:{children:ReactNode}){
  const trends=useMemo(()=>isDemo?trend(astronautId,scenario):remoteTrends,[isDemo,astronautId,scenario,remoteTrends]);
  const alerts=useMemo(()=>{const source=isDemo?scenarioAlerts(scenario):snapshot.alerts;return source.map(a=>acknowledged.includes(a.id)?{...a,status:'acknowledged' as const,clinician_acknowledged_at:new Date().toISOString()}:a)},[isDemo,scenario,snapshot.alerts,acknowledged]);
  const refresh=useCallback(()=>setTick(v=>v+1),[]);
- const acknowledge=useCallback(async(id:string)=>{if(!isDemo)await api.acknowledge(id);setAcknowledged(prev=>prev.includes(id)?prev:[...prev,id]);},[isDemo]);
+ const acknowledge=useCallback(async(id:string)=>{if(isPublic)throw new Error('Public dashboards are read-only');if(!isDemo)await api.acknowledge(id);setAcknowledged(prev=>prev.includes(id)?prev:[...prev,id]);},[isDemo,isPublic]);
  const toggleModule=(id:string)=>setEnabledModules(v=>v.includes(id)?v.filter(x=>x!==id):[...v,id]);
- const value={astronautId,setAstronautId,role,setRole,scenario,setScenario,snapshot,trends,alerts,is3D,set3D,isDemo,apiError,refresh,acknowledge,enabledModules,toggleModule,simulatedDisconnected,setSimulatedDisconnected};
+ const value={astronautId,setAstronautId,role,setRole,scenario,setScenario,snapshot,trends,alerts,is3D,set3D,isDemo,isPublic,apiError,refresh,acknowledge,enabledModules,toggleModule,simulatedDisconnected,setSimulatedDisconnected};
  return <MissionContext.Provider value={value}>{children}</MissionContext.Provider>
 }
 export function useMission(){const value=useContext(MissionContext);if(!value)throw new Error('useMission must be within MissionProvider');return value}
