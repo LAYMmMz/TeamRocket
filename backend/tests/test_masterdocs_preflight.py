@@ -23,6 +23,17 @@ class MasterdocsPreflightContract(unittest.TestCase):
                         "INSERT INTO", "DELETE FROM", "TRUNCATE", "GRANT "]:
             self.assertNotIn(keyword,upper)
 
+    def test_fresh_schema_draft_has_all_names_rls_and_candidate_fks(self):
+        root=Path(__file__).resolve().parents[2]
+        spec=json.loads((root/"frontend/src/data/masterdocs.json").read_text(encoding="utf-8"))
+        draft=(root/"supabase/manual/20261117_fresh_schema_57_table_DRAFT.sql").read_text(encoding="utf-8")
+        self.assertIn("DO NOT APPLY TO TEAMROCKET PRODUCTION",draft)
+        self.assertEqual(draft.count("CREATE TABLE IF NOT EXISTS public."),57)
+        for table in spec["tables"]:
+            self.assertIn('CREATE TABLE IF NOT EXISTS public."'+table["name"]+'"',draft)
+            self.assertIn('ALTER TABLE public."'+table["name"]+'" ENABLE ROW LEVEL SECURITY;',draft)
+        self.assertGreaterEqual(draft.count('ADD CONSTRAINT "fk_'),45)
+
     def test_local_scenario_report_does_not_claim_live_acceptance(self):
         root=Path(__file__).resolve().parents[2]
         source=(root/"backend/scripts/masterdocs_scenario_report.py").read_text(encoding="utf-8")
