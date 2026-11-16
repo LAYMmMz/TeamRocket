@@ -39,8 +39,6 @@ The project combines a **seven-dashboard frontend**, a **Python backend**, **Sup
 | **4. Check the habitat** | Go to **Health Systems → Cabin** and inspect the sample **CO₂** reading. | Crew health can be viewed alongside mission-environment context. |
 | **5. Inspect the system connection (optional)** | Open the [public JSON API](https://teamrocket-rocketpulse.vercel.app/api/v1/public/missions/DEMO-01/command?astronaut_id=CREW-01). | The response identifies its source as `supabase-approved-synthetic`. |
 
-**What judges should notice:** The interface uses **database-backed synthetic records** for supported public panels, rather than inventing readings when records are missing. Some other screens describe planned or locally prototyped workflows; those are not represented as live clinical results.
-
 **Direct links:** [Live app](https://teamrocket-rocketpulse.vercel.app) · [Crew API](https://teamrocket-rocketpulse.vercel.app/api/v1/public/missions/DEMO-01/command?astronaut_id=CREW-01) · [Backend health](https://teamrocket-rocketpulse.vercel.app/api/health)
 
 ## 🩺 What health risks does RocketPulse cover?
