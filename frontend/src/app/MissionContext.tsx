@@ -21,6 +21,7 @@ export function MissionProvider({children}:{children:ReactNode}){
  const [is3D,set3D]=useState(true);
  const [acknowledged,setAcknowledged]=useState<string[]>([]);
  const [remote,setRemote]=useState<CommandSnapshot|null>(null);
+ const [remoteCrew,setRemoteCrew]=useState('');
  const [remoteTrends,setRemoteTrends]=useState<TrendPoint[]>([]);
  const [apiError,setApiError]=useState<string|null>(null);
  const [tick,setTick]=useState(0);
@@ -29,12 +30,12 @@ export function MissionProvider({children}:{children:ReactNode}){
  const isPublic=dataMode==='public';
  useEffect(()=>{localStorage.setItem('astrovitals-modules',JSON.stringify(enabledModules))},[enabledModules]);
  useEffect(()=>{if(isDemo)return;let cancelled=false; const load=async()=>{
-  try{const [snapshot,points]=await Promise.all([api.command('DEMO-01',astronautId),api.trends(astronautId)]);if(!cancelled){setRemote(snapshot);setRemoteTrends(points);setApiError(null)}}
+  try{const [snapshot,points]=await Promise.all([api.command('DEMO-01',astronautId),api.trends(astronautId)]);if(!cancelled){setRemoteCrew(astronautId);setRemote(snapshot);setRemoteTrends(points);setApiError(null)}}
   catch(err){if(!cancelled){setApiError(err instanceof Error?err.message:'API connection failed');setRemote(null);setRemoteTrends([])}}};
   void load();const t=setInterval(()=>void load(),15000);return()=>{cancelled=true;clearInterval(t)}
  },[astronautId,isDemo,tick]);
- const snapshot=useMemo(()=>remote??(isDemo?getSnapshot(astronautId,scenario):{...getSnapshot(astronautId,'S01'),vitals:[],alerts:[],crew:[],exam_backlog:0,devices_online:0,devices_total:0,sync_state:'offline' as const}),[remote,isDemo,astronautId,scenario]);
- const trends=useMemo(()=>isDemo?trend(astronautId,scenario):remoteTrends,[isDemo,astronautId,scenario,remoteTrends]);
+ const snapshot=useMemo<CommandSnapshot>(()=>(remoteCrew===astronautId?remote:null)??(isDemo?getSnapshot(astronautId,scenario):{mission_id:'DEMO-01',mission_phase:'Unavailable',mission_day:0,timestamp:'Unavailable',vitals:[],alerts:[],crew:[],exam_backlog:0,devices_online:0,devices_total:0,sync_state:'offline'}),[remote,remoteCrew,isDemo,astronautId,scenario]);
+ const trends=useMemo(()=>isDemo?trend(astronautId,scenario):remoteCrew===astronautId?remoteTrends:[],[isDemo,astronautId,scenario,remoteTrends,remoteCrew]);
  const alerts=useMemo(()=>{const source=isDemo?scenarioAlerts(scenario):snapshot.alerts;return source.map(a=>acknowledged.includes(a.id)?{...a,status:'acknowledged' as const,clinician_acknowledged_at:new Date().toISOString()}:a)},[isDemo,scenario,snapshot.alerts,acknowledged]);
  const refresh=useCallback(()=>setTick(v=>v+1),[]);
  const acknowledge=useCallback(async(id:string)=>{if(isPublic)throw new Error('Public dashboards are read-only');if(!isDemo)await api.acknowledge(id);setAcknowledged(prev=>prev.includes(id)?prev:[...prev,id]);},[isDemo,isPublic]);

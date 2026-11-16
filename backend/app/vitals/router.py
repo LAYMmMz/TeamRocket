@@ -44,7 +44,7 @@ class SymptomCreate(BaseModel):
     is_synthetic: bool = True
 
 
-@router.post("/vitals", response_model=VitalOut, status_code=201)
+@router.post("/clinical/vitals", response_model=VitalOut, status_code=201)
 def create_vital(
     payload: VitalCreate,
     db: Session = Depends(get_db),

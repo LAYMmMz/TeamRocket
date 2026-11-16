@@ -8,6 +8,7 @@ from __future__ import annotations
 
 from collections import defaultdict
 from datetime import datetime
+import math
 from typing import Literal
 
 import httpx
@@ -29,6 +30,15 @@ METRICS = frozenset((
     "IMMUNE_INDEX", "SLEEP_H", "CO2_PPM", "CULTURE_INDEX",
     "CHECKIN_COUNT",
 ))
+# Legacy display indices lack the method-specific evidence required by MasterDocs.
+UNSUPPORTED_METRICS = frozenset(("VASCULAR_INDEX", "BONE_INDEX", "OCT_INDEX", "IMMUNE_INDEX", "CULTURE_INDEX"))
+METRIC_CONTRACTS = {
+    "HR": ("cardiorespiratory", "bpm"), "SpO2": ("cardiorespiratory", "%"),
+    "RR": ("cardiorespiratory", "breaths/min"), "BP_SYS": ("cardiorespiratory", "mmHg"),
+    "DOSE_MSV": ("radiation", "mSv"), "GRAVITY_G": ("gravity", "g"),
+    "EXERCISE_MIN": ("fitness", "min"), "SLEEP_H": ("sleep", "h"),
+    "CO2_PPM": ("cabin", "ppm"), "CHECKIN_COUNT": ("medicalops", "count"),
+}
 VISIBLE_COLUMNS = (
     "event_id,mission_id,astronaut_code,domain,metric_code,value,"
     "unit,measured_at,quality,verification,source_type,is_synthetic,"
@@ -108,8 +118,15 @@ def _read_approved(settings, *, crew: str, domain: str | None = None):
             when = datetime.fromisoformat(r["measured_at"].replace("Z", "+00:00"))
         except (ValueError, TypeError, KeyError, OverflowError) as exc:
             raise HTTPException(503, "Invalid synthetic feed data") from exc
-        if not 0 <= numeric <= 10000 or when.tzinfo is None:
+        if not math.isfinite(numeric) or not 0 <= numeric <= 10000 or when.tzinfo is None:
             raise HTTPException(503, "Invalid synthetic feed range")
+        if domain is not None and r["domain"] != domain:
+            raise HTTPException(503, "Synthetic feed domain mismatch")
+        if r["metric_code"] in UNSUPPORTED_METRICS:
+            continue
+        expected_domain, expected_unit = METRIC_CONTRACTS[r["metric_code"]]
+        if (r["domain"], r["unit"]) != (expected_domain, expected_unit):
+            raise HTTPException(503, "Synthetic measurement contract mismatch")
         approved.append({
             "event_id": r["event_id"], "mission_id": MISSION,
             "astronaut_id": crew, "metric_code": r["metric_code"],
@@ -205,8 +222,6 @@ def public_domain(
     if domain_id not in DOMAINS:
         raise HTTPException(404, "Unknown synthetic monitoring domain")
     rows = _read_approved(settings, crew=astronaut_id, domain=domain_id)
-    if not rows:
-        raise HTTPException(503, "Public synthetic feed has not been seeded")
     _cache(response)
     return [{
         "id": r["event_id"], "label": r["metric_code"],

@@ -152,6 +152,31 @@ class PublicSyntheticTests(unittest.TestCase):
             )
             self.assertEqual(r.status_code, 503, update)
 
+    def test_undefined_indices_are_not_presented_as_clinical_readings(self):
+        for metric, domain in [("IMMUNE_INDEX", "immune"), ("BONE_INDEX", "bone"),
+                               ("VASCULAR_INDEX", "vascular"), ("OCT_INDEX", "vision"),
+                               ("CULTURE_INDEX", "microbiology")]:
+            StubHTTP.items = [sample(metric, domain, 1)]
+            response = self.client.get(
+                f"/api/v1/public/reports/domains/{domain}?astronaut_id=CREW-01")
+            self.assertEqual(response.status_code, 200, response.text)
+            self.assertEqual(response.json(), [])
+
+    def test_empty_domain_is_unavailable_not_fabricated(self):
+        StubHTTP.items = []
+        response = self.client.get("/api/v1/public/reports/domains/vision?astronaut_id=CREW-01")
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(response.json(), [])
+
+    def test_metric_domain_and_unit_must_agree(self):
+        for update in [{"unit": "mSv"}, {"domain": "immune"}, {"value": "NaN"}]:
+            StubHTTP.items = [dict(sample(), **update)]
+            response = self.client.get("/api/v1/public/missions/DEMO-01/command?astronaut_id=CREW-01")
+            self.assertEqual(response.status_code, 503, response.text)
+        StubHTTP.items = [sample()]
+        response = self.client.get("/api/v1/public/reports/domains/sleep?astronaut_id=CREW-01")
+        self.assertEqual(response.status_code, 503)
+
     def test_other_missions_and_invalid_crews_are_denied(self):
         self.assertEqual(self.client.get(
             "/api/v1/public/missions/PRIVATE/command?astronaut_id=CREW-01"

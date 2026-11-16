@@ -371,15 +371,17 @@ def create_app(settings=None):
 
     # TEAMROCKET_PINNED_FRIEND_DEV2_MERGE_V1: friend Dev2 clinical demo, isolated from official sync.
     from app.dev2_friend_attach import attach_dev2
-    attach_dev2(app, settings)
 
     # Dev2 modular domain routers (prototype only; secure Dev1 Store retained).
     from app.domain2.router import router as dev2_domain
     from app.domain2.reports import router as dev2_reports
     from app.domain2.baselines import router as dev2_baselines
     from app.domain2.vitals import router as dev2_vitals
-    for added_router in [dev2_domain, dev2_baselines]:
+    for added_router in [dev2_domain, dev2_baselines, dev2_vitals, dev2_reports]:
         app.include_router(added_router, prefix="/api")
+
+    # Exact canonical routes precede legacy parameterized report routes.
+    attach_dev2(app, settings)
 
     # TeamRocket Dev2 domain analysis + dashboard routers
     from app.domain2.analysis import router as dev2_analysis_router
