@@ -52,12 +52,13 @@ class SyncWorker:
         self.max_attempts = max(1, min(int(max_attempts), 20))
         self.batch_size = max(1, min(int(batch_size), 1000))
 
-    def run_once(self, mission_ids=None):
+    def run_once(self, mission_ids=None, kinds=None):
         delivered = failed = 0
         for _ in range(self.batch_size):
             items = self.store.claim_batch(
                 1, mission_ids=mission_ids,
-                max_attempts=self.max_attempts
+                max_attempts=self.max_attempts,
+                kinds=kinds
             )
             if not items:
                 break
