@@ -1,21 +1,21 @@
 # RocketPulse V2 — Vortex Spacecraft Command Edition
 
-**A real, modular React frontend starter** built around the user's **NASA Astronaut Health Monitoring — Final Development MasterDocs (15 November 2026)**. The visual style is **inspired by** [Imran Jakir's Futuristic Spacecraft Command Dashboard](https://dribbble.com/shots/27171089-Futuristic-Spacecraft-Command-Dashboard-Sci-Fi-Spaceship-UI), adapted into an original medical mission-control interface. No designer assets were copied.
+**The React frontend for TeamRocket's RocketPulse synthetic-data research prototype**, mapped to the **NASA Astronaut Health Monitoring — Final Development MasterDocs (15 November 2026)**. The visual style is **inspired by** [Imran Jakir's Futuristic Spacecraft Command Dashboard](https://dribbble.com/shots/27171089-Futuristic-Spacecraft-Command-Dashboard-Sci-Fi-Spaceship-UI), adapted into an original medical mission-control interface. No designer assets were copied.
 
 ## What is included
 
-- 7 PDF-specific role-oriented dashboards (F40–F46), **all navigable**.
-- 12 monitoring domains with clinical caution text, sample records and canonical table references.
-- 47-feature searchable traceability board, each feature with its own detail URL (`/features/F01` ... `/features/F47`).
+- 7 PDF-specific role-oriented dashboard views (F40–F46), **all navigable**; navigability is not full workflow acceptance.
+- 12 monitoring-domain pages with clinical caution text and canonical table references. Only domains with published approved synthetic samples return records; other domains display unavailable/empty states.
+- 47-feature searchable traceability board, each feature discoverable at `/features/F01` ... `/features/F47`. Feature pages document available reads and acceptance gaps; they do not mean all 47 clinical workflows are implemented.
 - 57 exact logical cloud tables and starter columns; 6 physical SQLite tables documented and browsable. The Schema-Aware Data Intake page generates browser-side synthetic JSON drafts for any canonical cloud table (never direct DB writes).
 - All 12 scenario IDs S01–S12, five hazards and eight research-gap categories.
 - 3D astronaut prototype with clickable head/chest/torso/arms/legs and alternative controls.
-- Synthetic 30-day, 4-crew **vital readings** generated deterministically (8,640 HR/SpO2/RR plus 240 systolic BP sample records); scenario fixture changes.
+- Deterministic 30-day, four-crew browser fixtures (8,640 HR/SpO2/RR plus 240 systolic BP readings) are available **only in explicit demo mode**; scenario changes do not execute backend acceptance tests.
 - Medical alert review, acknowledgement and symptom form. In **demo mode** these are **browser-only**, not authoritative clinical events.
 - Frontend module switchboard and shared reading metadata (units, provenance, quality, verification, timestamps, synthetic labels).
-- Centralized FastAPI fetch client, typed contracts and proposed OpenAPI handoff.
+- Centralized FastAPI fetch client, typed contracts, a public GET-only approved-synthetic feed, and protected JWT-required API operations.
 
-**Not included / not claimed:** FastAPI server, all 57 real Supabase SQL migrations, SQLite engine or encryption, NASA dataset ingestion, real authentication/RLS, persistent clinical workflow, sync receipts, clinical validation, backend tests, authorized procedures, or a verified production build. The UI explicitly calls out these dependencies. The PDF requires them for complete acceptance.
+**Not claimed:** complete acceptance of all 47 features, a full bootstrap of all 57 cloud tables, complete clinical-domain datasets, validated medical rules or procedures, deployed end-to-end authorization for every workflow, or NASA operational/medical-device certification. See the [PDF alignment and acceptance blockers](../docs/PDF_ALIGNMENT_STATUS.md) and [QA scope](docs/QA_AND_SCOPE.md).
 
 ## Windows setup (PowerShell, including machines with npm PATH issues)
 
@@ -27,31 +27,33 @@
 ```powershell
 node -v
 npm.cmd -v
-npm.cmd install
+npm.cmd ci
 Copy-Item .env.example .env
 npm.cmd run dev
 ```
 
 Open the URL Vite prints (usually <http://localhost:5173>). If `npm.cmd` is not recognized, fix Node.js installation/PATH before attempting any project troubleshooting.
 
-For macOS/Linux, use `npm install`, `cp .env.example .env`, then `npm run dev`.
+For macOS/Linux, use `npm ci`, `cp .env.example .env`, then `npm run dev`.
 
 ## Modes and backend integration
 
-The frontend defaults to clearly labeled deterministic synthetic fixtures:
+The app defaults to **public mode**. It reads only approved synthetic sample records through the FastAPI `/api/v1/public` GET endpoints; it does not read protected clinical tables or write data. Missing records and request failures stay unavailable—there is no fixture fallback.
+
+```ini
+VITE_DATA_MODE=public
+VITE_API_BASE_URL=/api/v1
+```
+
+Use **demo mode** only to explore deterministic browser fixtures and UI scenarios; demo writes stay in the browser and are not clinical records:
 
 ```ini
 VITE_DATA_MODE=demo
-VITE_API_BASE_URL=http://localhost:8000/api/v1
 ```
 
-Switch to **API mode** only when your Python backend exposes the endpoints described in `docs/BACKEND_HANDOFF.md`:
+**API mode** calls protected FastAPI endpoints and requires a valid user access token. The frontend obtains it through the Supabase Auth provider; FastAPI must enforce mission and record authorization for every request. Never expose a service-role key in the browser. API failures are shown and never cause a switch to demo fixtures.
 
-```ini
-VITE_DATA_MODE=api
-```
-
-In API mode, backend failure is shown as an error; the app does not silently populate mock NASA readings. Supply a Supabase Auth token provider using `configureAuthTokenProvider` in `src/lib/api.ts`; never expose service-role keys in React. The backend must authorize all operations and enforce record access.
+For local public/API reads, start FastAPI on port `8000`; Vite proxies `/api` to it. Hosted Vercel uses the same-origin rewrite configured in `vercel.json`. Browser `VITE_*` variables are public and must contain no database password or service-role key.
 
 ## How to add/remove UI modules
 
@@ -84,19 +86,19 @@ Open **Module Switchboard** in the sidebar. Toggle nav visibility for each route
 npm.cmd run check:scope
 npm.cmd run typecheck
 npm.cmd run build
+npm.cmd run test:database-ui
 ```
 
-The scope test uses Node's built-in filesystem and can run without installed npm packages (`node scripts/check-scope.mjs`). The TypeScript build requires `npm install` and network access to the npm registry.
+The scope test uses Node's built-in filesystem and can run without installed npm packages (`node scripts/check-scope.mjs`). `test:database-ui` uses Playwright with controlled API responses; install Chromium once with `npx playwright install chromium`. It verifies frontend behavior, not live Supabase permissions or clinical acceptance.
 
 ## Demo walkthrough
 
-1. Open `/command` and choose **S04** to show evidence-linked CO2 / headache alert.
-2. Rotate the 3D astronaut and select **chest**, then open its monitoring domain.
-3. Open `/cases` and acknowledge the simulated incident (browser-only state).
-4. Open `/simulation`, switch to S03 and confirm SpO₂ is **missing**, not falsely displayed as normal.
-5. Open S10 to see the simulated connection-loss UI (not actual SQLite sync).
-6. Open `/data-model` and inspect 57 canonical cloud tables / six SQLite tables.
-7. Open `/coverage` and show all 47 feature IDs plus the seven role dashboards.
+1. Open `/command` and select a synthetic crew identifier. Readings and trends come from the approved public FastAPI feed, not the browser fixture generator.
+2. Rotate the 3D astronaut, select a body area, and open the linked health domain. The model is a navigation aid, not a medical scan.
+3. Open `/cases`; protected writes and alert acknowledgments are unavailable in public mode.
+4. Open `/simulation`. Outside explicit demo mode, scenarios are reference descriptions, not backend executions.
+5. Open `/data-model` and inspect the logical cloud catalog; it is not a live schema inspection.
+6. Open `/coverage` to review the 47 traceability entries and their incomplete acceptance status.
 
 ## Safety
 
