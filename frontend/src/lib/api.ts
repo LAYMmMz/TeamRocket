@@ -11,7 +11,9 @@ export function configureAuthTokenProvider(fn:()=>Promise<string|null>){accessTo
 
 /** Transport ONLY. FastAPI handles authorization, SQLite persistence, rules and Supabase sync. */
 export async function request<T>(path:string,opts:RequestInit={}):Promise<T>{
- const token=await accessTokenProvider();
+ if(dataMode==='public'&&(opts.method||'GET').toUpperCase()!=='GET')
+   throw new Error('Public display is strictly read-only');
+ const token=dataMode==='public'?null:await accessTokenProvider();
  const response=await fetch(`${root}${path}`,{...opts,headers:{'Content-Type':'application/json',...(token?{Authorization:`Bearer ${token}`} : {}),...opts.headers}});
  if(!response.ok){let message=`HTTP ${response.status}`;try{const json=await response.json();message=json.detail||json.message||message}catch{}throw new Error(message)}
  return response.json() as Promise<T>;
