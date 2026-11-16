@@ -117,6 +117,36 @@ class FrontendHTTPTests(unittest.TestCase):
         record = self.client.app.state.store.get("symptom_report", body["event_id"])
         self.assertEqual(record["source_type"], "SIMULATED")
 
+    def test_supported_outbox_kind_receipt_and_unsupported_audit_retained(self):
+        """Prove matching synthetic receipts, not a live Supabase write."""
+        from app.sync.worker import MemoryReceiptTransport, SyncWorker
+        store = self.client.app.state.store
+        payload = {
+            "event_id": "synthetic-cloud-proof-001",
+            "mission_id": "DEMO-01", "astronaut_id": "CREW-01",
+            "metric": "heart_rate", "value": 70, "unit": "bpm",
+            "source_type": "SIMULATED", "is_synthetic": True,
+            "measured_at": datetime.now(timezone.utc).isoformat(),
+            "quality": "VALID", "verification": "UNVERIFIED",
+            "source_reference": "receipt-contract-test", "source_revision": "v1",
+        }
+        created = self.client.post("/api/measurements", json=payload, headers=self.admin)
+        self.assertEqual(created.status_code, 201, created.text)
+        transport = MemoryReceiptTransport()
+        worker = SyncWorker(store, transport, batch_size=10)
+        delivered = worker.run_once(mission_ids=["DEMO-01"], kinds=["measurement"])
+        self.assertEqual(delivered["delivered"], 1)
+        self.assertEqual(delivered["failed"], 0)
+        receipt = store.receipt("measurement", payload["event_id"])
+        self.assertIsNotNone(receipt)
+        self.assertEqual(receipt["status"], "ingested")
+        self.assertEqual(receipt["event_id"], "measurement:" + payload["event_id"])
+        self.assertEqual(len(transport.calls), 1)
+        self.assertTrue(
+            store.queue_status(mission_ids=["DEMO-01"])["counts"].get("pending", 0) > 0,
+            "Unsupported audit and rule events must remain queued locally, not be sent to RPC",
+        )
+
     def test_manual_cloud_sync_requires_privileged_user_and_configuration(self):
         endpoint = "/api/v1/sync/run?mission_id=DEMO-01"
         # No JWT is rejected; crew must not trigger cloud writes.
