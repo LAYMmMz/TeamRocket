@@ -17,11 +17,11 @@ The server selects a fixed set of fields and applies `approved_for_public=true`,
 
 ## One-time database setup (manual, audited)
 
-**Important:** ChatGPT's Supabase connector is currently signed into a different organization and cannot see `TeamRocketV2Database`, project `ziecxjoeljxoocixejtz`. Therefore **this SQL has not been executed and the new table does not exist until the project owner runs it**.
+**Existing TeamRocketV2Database status (2026-11-16):** The project owner executed `supabase/manual/20261116_public_demo_feed.sql` in `ziecxjoeljxoocixejtz`. The anonymous-role query returned **428 visible synthetic rows**, and a public API GET returned HTTP 200 with `data_source=supabase-approved-synthetic`. The Supabase connector account in ChatGPT itself still cannot directly edit this project. For a *new* Supabase project, repeat the reviewed SQL setup manually.
 
 1. As the TeamRocket database owner, review `supabase/manual/20261116_public_demo_feed.sql` before executing it in the **correct production project** SQL Editor. It creates only `public.rocketpulse_public_demo_samples`, grants `anon SELECT` with a strict RLS policy, disallows anonymous writes and seeds 428 predictable **synthetic-only, public-approved** measurement rows. The seed is idempotent; rerunning does not overwrite approved statuses or modify existing data.
 2. Run the final verification SELECT. Expected `total_synthetic_rows >= 428`, `approved_synthetic_rows >= 428`, `anon_can_select=true`, `anon_can_insert/update/delete=false`, `rls_enabled=true`, and `visible_to_anonymous >= 428`. If any values differ, **stop**, inspect the state and do not broaden RLS permissions on clinical tables.
-3. Only then enable `VITE_DATA_MODE=public` on the desired **Vercel Preview** branch and redeploy. Use `VITE_API_BASE_URL=/api/v1`, which targets the existing Railway rewrite. Production demo mode should remain until the preview is verified.
+3. For **judges' production**, set `VITE_DATA_MODE=public` and `VITE_API_BASE_URL=/api/v1` on Vercel Production and redeploy. This has already been configured and verified at https://teamrocket-rocketpulse.vercel.app. The preview can independently use the same mode. Never switch the public site to `api` mode unless intentionally enabling the JWT-protected login experience.
 4. Test without login:
    - `GET /api/v1/public/missions/DEMO-01/command?astronaut_id=CREW-01` returns JSON with `data_source=supabase-approved-synthetic`, only fake crew codes and explicitly synthetic vitals.
    - `GET /api/v1/public/measurements/trends?astronaut_id=CREW-01` returns the historical synthetic chart.
@@ -39,8 +39,13 @@ The server selects a fixed set of fields and applies `approved_for_public=true`,
 - Any changes to dashboard data beyond the synthetic seed should be made by a reviewed, privileged SQL operator—not by an anonymous API endpoint. Avoid exposing INSERT/UPDATE/DELETE permissions in Supabase.
 - The protected mission sync worker remains separate and its long-lived background worker is still disabled.
 
-## Status
+## Verified judges' production status (2026-11-16)
 
-- GitHub integration branch: `feat/frontend-backend-api-integration`; draft PR #4, no merge.
-- FastAPI route implementation and automated tests are committed.
-- **Cloud readiness remains pending the owner's explicit execution of the new SQL file in the correct Supabase project**, plus public endpoint live validation. Do not mark real database reads verified until the endpoint returns at least one row and the synthetic source marker is present.
+- Stable public URL: **https://teamrocket-rocketpulse.vercel.app**; served by Vercel, without an app login.
+- `GET /api/health`: HTTP 200, FastAPI on Railway.
+- `GET /api/v1/public/missions/DEMO-01/command?astronaut_id=CREW-01`: HTTP 200, `data_source=supabase-approved-synthetic`, 4 fictional crew profiles.
+- `GET /api/v1/public/measurements/trends?astronaut_id=CREW-01`: HTTP 200, 24 synthetic historical points.
+- `GET /api/v1/public/reports/domains/cabin?astronaut_id=CREW-01`: HTTP 200, one synthetic cabin reading.
+- `public.rocketpulse_public_demo_samples`: 428 rows visible under anonymous RLS, independently verified by the project owner through the SQL Editor.
+- Private clinical endpoints remain JWT-protected; unattended 24/7 cloud writes are not verified or enabled.
+- The GitHub integration branch is the repository default; the associated draft PR #4 is preserved, not merged. See the [judge-facing root README](../README.md) for the production link and complete deployment instructions.
