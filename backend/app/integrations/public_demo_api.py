@@ -144,7 +144,7 @@ def _vital(row):
         "unit": row["unit"], "baseline": None, "source_type": "synthetic",
         "is_synthetic": True, "measured_at": row["measured_at"],
         "received_at": row["measured_at"], "source_device_id": None,
-        "quality": "ok", "verification": "unreviewed",
+        "quality": "VALID", "verification": "UNVERIFIED",
     }
 
 
@@ -227,7 +227,7 @@ def public_domain(
         "id": r["event_id"], "label": r["metric_code"],
         "value": str(r["value"]), "unit": r["unit"],
         "measured_at": r["measured_at"], "source": "SIMULATED",
-        "quality": "unreviewed",
+        "quality": "VALID / UNVERIFIED",
         "details": "Approved synthetic Supabase sample; not a clinical observation",
         "record_table": "rocketpulse_public_demo_samples",
         "is_synthetic": True,

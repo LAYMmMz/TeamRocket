@@ -1,14 +1,18 @@
 # QA / release limitations
 
-## Manifest validation performed
+## Validation performed
 
-`node scripts/check-scope.mjs` verifies 47 feature IDs, 7 views, 12 domains, 57 canonical cloud tables, 6 onboard tables, 12 scenario definitions and 5 hazards plus cross-references. It **does not** validate live backend behavior.
+`npm run check:scope` verifies 47 feature IDs, 7 views, 12 domains, 57 canonical cloud tables, 6 onboard tables, 12 scenario definitions and 5 hazards plus cross-references. It **does not** validate live backend behavior.
 
-A TypeScript transpilation syntax check is possible in the build environment; however, full `npm install`, `npm run build`, and browser runtime validation require the dependency registry and could not be run in the provided offline environment. Do not describe this project as production-ready or all 47 features implemented.
+- `npm ci` completed; `npm run build` passed TypeScript and Vite production build. Vite reports the existing large-chunk warning (the main JavaScript chunk is about 1.7 MB before gzip).
+- `npm run test:database-ui` passed with Chromium. The controlled API test checks source-accurate public labels, dashboard and explorer reads, crew-switch isolation, unsupported-metric filtering, API error/empty states, read-only controls and scenario boundaries. It does not call or certify the live Supabase service.
+- Backend `python -m unittest discover -s tests -t .` passed: 174 tests, 4 skipped.
+
+These checks do **not** make the project production-ready or establish acceptance of all 47 features, live cloud authorization, database migrations, or clinical workflows.
 
 ## Source-backed seed targets, not all generated in frontend
 
-| Seed dataset | Source target | Actual frontend mock implementation |
+| Seed dataset | Source target | Demo-mode fixture implementation |
 |---|---:|---|
 | Hourly HR / SpO₂ / respiratory rate | 8,640 rows | 8,640 deterministic readings (4 crew × 30 days × 24 hours × 3 metrics) |
 | Blood pressure | 240 rows | 240 systolic demo readings (not full BP measurement contract) |

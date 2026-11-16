@@ -20,14 +20,24 @@ await page.route('**/api/v1/**',async route=>{
  else await route.fulfill({json:rows});
 });
 try{
+ await page.goto(base+'/command');
+ await page.getByText('SUPABASE APPROVED SYNTHETIC DATA',{exact:true}).waitFor();
+ await page.getByText('SYNTHETIC / 24-HOUR RECORDED WINDOW',{exact:true}).waitFor();
+ assert.equal(await page.getByText('FOUR SIMULATED CREW MEMBERS',{exact:true}).count(),0);
+ assert.equal(await page.getByText('SIMULATED / LAST 24 HOURS',{exact:true}).count(),0);
+ assert.equal(await page.getByText('0/0',{exact:true}).count(),0);
+ assert.equal(await page.getByText('Not declared',{exact:true}).count(),0);
  for(const path of ['/individual','/examinations','/environment','/laboratory','/crew','/ground']){
   await page.goto(base+path);await page.getByText('6.25',{exact:true}).first().waitFor();
-  assert.equal(await page.getByLabel('View as role').count(),0);
+  assert.equal(await page.getByLabel('Demo role view').count(),0);
  }
  await page.getByLabel('Selected crew member').selectOption('CREW-02');
  assert.equal(await page.getByText('6.25',{exact:true}).count(),0,'Old crew reading leaked during selection');
  await page.getByText('8.75',{exact:true}).first().waitFor();
  await page.goto(base+'/explorer');await page.getByText('6.25',{exact:true}).first().waitFor();
+ const boneRead=page.waitForRequest(request=>request.url().includes('/reports/domains/bone'));
+ const legs=page.getByRole('button',{name:'LEGS',exact:true});
+ await legs.click();await boneRead;assert.equal(await legs.getAttribute('aria-pressed'),'true');
  await page.goto(base+'/domains/immune');await page.getByText('No records available. Missing data does not mean normal.').waitFor();
  assert.equal(await page.getByText('IMMUNE_INDEX',{exact:true}).count(),0);
  await page.goto(base+'/features/F22');await page.getByText('Connected read path',{exact:true}).waitFor();await page.getByText('6.25',{exact:true}).first().waitFor();

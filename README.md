@@ -67,7 +67,7 @@ The table below describes the **project's monitoring scope**, not a claim that e
 - **Radiation totals** are only compared when quantities, units and time intervals are compatible.
 - **Sensitive behavioral data** is restricted, not shared on the public dashboard.
 
-For a full feature-by-feature checklist, see [the 47-feature matrix](frontend/docs/FEATURE_MATRIX.md).
+For the source-verified acceptance gaps, see [the MasterDocs implementation audit](docs/MASTERDOCS_IMPLEMENTATION_AUDIT.md).\n\nFor a full feature-by-feature checklist, see [the 47-feature matrix](frontend/docs/FEATURE_MATRIX.md).
 
 ## ✅ What's working, and what's still a prototype?
 
