@@ -388,7 +388,9 @@ def create_app(settings=None):
     app.include_router(dev2_dashboard_router, prefix="/api")
 
     from app.integrations.frontend_api import router as frontend_api
+    from app.integrations.public_demo_api import router as public_demo_api
     app.include_router(frontend_api)
+    app.include_router(public_demo_api)
 
     return app
 
