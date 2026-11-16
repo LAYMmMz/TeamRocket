@@ -16,6 +16,25 @@ This branch includes protected FastAPI `/api/v1` compatibility endpoints used by
 - Railway staging `CORS_ORIGINS` is currently `http://localhost:5173`; the real Vercel production/preview origin must be added separately. Do not add `*` for convenience.
 - **Before enabling browser API mode**, configure Vercel environment variables and verify Supabase JWT algorithm, role mapping, and mission scope.
 
+## Vercel frontend deployment — correct project and proxy
+
+The active Vercel project is [team-rocket-rocket-pulse-front-end](https://vercel.com/laymmmzs-projects/team-rocket-rocket-pulse-front-end), configured with Root Directory `frontend`. The older `rocketpulse` project points to the obsolete `RocketPulse FrontEnd` directory and currently reports a failed build. Do not use that older project.
+
+`frontend/vercel.json` sends same-origin `/api/v1/*` requests to the Railway staging FastAPI URL; the React client uses `/api/v1` for hosted builds by default when `VITE_API_BASE_URL` is unset. Local development still defaults to `http://localhost:8000/api/v1`. The proxy avoids cross-origin requests from the Vercel browser but **does not remove backend authentication**. Keep JWT verification and mission-grant checks enabled.
+
+For the active Vercel project, set the following **public browser-build variables** under Settings → Environment Variables (Preview only while testing):
+
+```dotenv
+VITE_DATA_MODE=api
+VITE_API_BASE_URL=/api/v1
+VITE_SUPABASE_URL=https://ziecxjoeljxoocixejtz.supabase.co
+VITE_SUPABASE_PUBLISHABLE_KEY=<your public sb_publishable key>
+```
+
+Then redeploy the integration branch preview. No `NEXT_PUBLIC_` variables are consumed by this Vite app. Do not use `VITE_DATA_MODE=api` in Production until the authorized-user flow and seven dashboards have been reviewed. Without environment variables, the frontend intentionally remains in deterministic demo mode, even when the proxy is present.
+
+The Vercel app integration was reported installed by the user but its account-management actions were not available to the assistant in that session, so these dashboard settings have **not** been remotely applied or verified.
+
 ## Credentials: do NOT paste secrets into GitHub code, chat, commits, or Vite variables
 
 Frontend Vercel project (Root Directory `frontend`, Vite, output `dist`):
