@@ -22,5 +22,8 @@ export const api={
  domain:(domainId:string,crewId:string)=>request<CaseRecord[]>(`/reports/domains/${encodeURIComponent(domainId)}?astronaut_id=${encodeURIComponent(crewId)}`),
  acknowledge:(alertId:string)=>request<Alert>(`/alerts/${encodeURIComponent(alertId)}/acknowledgments`,{method:'POST',headers:{'Idempotency-Key':crypto.randomUUID()},body:JSON.stringify({action:'acknowledge'})}),
  symptom:(body:{astronaut_id:string;symptom_code:string;severity:string;notes:string;event_id:string})=>request<unknown>('/symptoms',{method:'POST',headers:{'Idempotency-Key':body.event_id},body:JSON.stringify({...body,is_synthetic:true})}),
- sync:()=>request<{queue_depth:number;last_receipt_at:string|null;state:string}>('/sync/status')
+ sync:()=>request<{queue_depth:number;last_receipt_at:string|null;state:string}>('/sync/status'),
+ runSync:(missionId:string)=>request<{
+   delivered:number;failed:number;queue:{counts:Record<string,number>}
+ }>(`/sync/run?mission_id=${encodeURIComponent(missionId)}`,{method:'POST'})
 };
