@@ -457,9 +457,16 @@ def sync_authorized_mission(
                        "Cloud sync requires a Supabase asymmetric-signed JWT")
     transport = HTTPReceiptTransport(settings)
     transport.access_token = bearer
+    # Only kinds implemented by the existing cloud RPC are eligible.
+    # Audit, cursor and alert events remain durable locally, never sent as
+    # unsupported RPC kinds that would exhaust retries.
     result = SyncWorker(
         store, transport, settings.sync_max_attempts, settings.sync_batch_size
-    ).run_once(mission_ids=[mission_id])
+    ).run_once(mission_ids=[mission_id], kinds=[
+        "measurement", "vital_sign", "symptom",
+        "radiation", "environment", "laboratory_result",
+        "examination", "wellness", "report",
+    ])
     store.audit(
         "sync.run_user_session", principal.user_id, mission_id=mission_id,
         details={"delivered": result["delivered"], "failed": result["failed"]},
