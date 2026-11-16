@@ -132,6 +132,9 @@ class FrontendHTTPTests(unittest.TestCase):
         }
         created = self.client.post("/api/measurements", json=payload, headers=self.admin)
         self.assertEqual(created.status_code, 201, created.text)
+        # Explicitly queue an unsupported audit event; measurements do not
+        # automatically enqueue a standalone audit entry in this store.
+        store.audit("sync.test", "qa-admin", mission_id="DEMO-01")
         transport = MemoryReceiptTransport()
         worker = SyncWorker(store, transport, batch_size=10)
         delivered = worker.run_once(mission_ids=["DEMO-01"], kinds=["measurement"])
