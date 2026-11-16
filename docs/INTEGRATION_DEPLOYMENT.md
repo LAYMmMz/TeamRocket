@@ -110,3 +110,16 @@ The backend health endpoint reports `cloud_sync_configured` for the older automa
 
 **Known risk:** The repository's earlier migration `supabase/migrations/20261115_02_ingest_sync_event_rpc.sql` has an old unguarded seed snippet involving `v_demo_user_id`; do not rerun historical SQL against the existing database. Review the deployed RPC `pg_get_functiondef` and grants instead if the preflight indicates a mismatch.
 
+
+## Security audit finding (2026-11-16, confirmed through user's SQL Editor)
+
+**Do NOT enable the Railway `SYNC_RPC_URL` yet.** The live `TeamRocketV2Database` read-only audit returned:
+
+- `public.ingest_sync_event(jsonb)`: `SECURITY DEFINER=true`, function owner `postgres`, `anon_can_execute=true`, `authenticated_can_execute=true`, `search_path=public`. Anonymous function access must be revoked even though the RPC checks `auth.uid()` internally.
+- `public.health_logs`: a policy named `Enable all access for hackathon on health_logs` allows `ALL TO public USING (true) WITH CHECK (true)`. It overrides the otherwise present `health_logs_read_mission_members` policy for applicable roles.
+- `public.missions`: RLS enabled but no policies; non-privileged direct reads are denied. Do not add an unrestricted read policy.
+- 7/7 required tables with RLS enabled, `DEMO-01` has three mission_members, six astronauts, and five existing sync receipts. Table counts are not proof of correct permissions or end-to-end data flow.
+
+The reviewed, *manually executed* narrow remediation is `supabase/manual/20261116_restrict_sync_rpc_and_health_logs.sql`. It atomically revokes `PUBLIC` and `anon` execution on the privileged RPC, retains `authenticated` execution, drops the exact broad health_logs policy, preserves the mission-scoped SELECT policy, and removes anonymous table access. It contains a precondition guard and a verification SELECT. It **has not been run** in Supabase because ChatGPT's connector cannot access this project.
+
+**Owner action:** open the correct Supabase SQL Editor, review and execute that SQL file, then share only the final verification row. Expected `anon_rpc_execute=false`, `authenticated_rpc_execute=true`, `anon_health_logs_select_grant=false`, `unrestricted_policy_present=false`, and `mission_policy_present=true`. If execution fails, stop and share the error; do not run arbitrary grants or legacy migrations. After validation, verify authorized JWT claims and mission membership, configure Railway's fixed `SYNC_RPC_URL` for the on-demand user-session sync route, then match the exact synthetic event receipt in `public.sync_receipts`.
