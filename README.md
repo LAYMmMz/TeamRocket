@@ -67,7 +67,7 @@ The table below describes the **project's monitoring scope**, not a claim that e
 - **Radiation totals** are only compared when quantities, units and time intervals are compatible.
 - **Sensitive behavioral data** is restricted, not shared on the public dashboard.
 
-For the source-verified acceptance gaps, see [the MasterDocs implementation audit](docs/MASTERDOCS_IMPLEMENTATION_AUDIT.md).
+New protected local synthetic clinical-examination and laboratory read adapters, plus a 57-table cloud audit and 12-scenario evidence reporter, are being reviewed in [PR #9](https://github.com/LAYMmMz/TeamRocket/pull/9). These do **not** certify a deployed clinical cloud database or complete S01–S12 acceptance.\n\nFor the source-verified acceptance gaps, see [the MasterDocs implementation audit](docs/MASTERDOCS_IMPLEMENTATION_AUDIT.md).
 
 For a full feature-by-feature checklist, see [the 47-feature matrix](frontend/docs/FEATURE_MATRIX.md).
 
