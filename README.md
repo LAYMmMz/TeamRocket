@@ -111,7 +111,7 @@ Separate authenticated prototype workflows:
 - **Cloud database:** **Supabase PostgreSQL**, with row-level security and an isolated read-only public feed.
 - **Offline storage:** Encrypted **SQLite**, with queueing and receipt-based synchronization in authorized workflows.
 
-The broader database design includes crew profiles, mission assignments, health observations, vascular ultrasound, bone scans, eye exams, laboratory results, environmental readings, alerts, incidents, inventory and audit records. **The 57-table cloud inventory is a design target, not proof that all 57 tables exist in the deployed project.**
+The broader database design includes crew profiles, mission assignments, health observations, vascular ultrasound, bone scans, eye exams, laboratory results, environmental readings, alerts, incidents, inventory and audit records. **All 57 canonical PostgreSQL tables exist in the connected Supabase project, and their PDF starter-field presence was verified in an operator-refreshed snapshot.** This does not mean all 57 clinical workflows, constraints, or end-to-end scenarios have passed acceptance. [Live database verification](docs/LIVE_SUPABASE_DATA_TABLES.md).
 
 For reviewers interested in implementation details: [database inventory](frontend/docs/DATABASE_MAP.md) · [database architecture](database/docs/DatabaseSchema.md) · [backend modules and local setup](backend/README.md) · [frontend](frontend/) · [API integration](backend/app/integrations/) · [domain validation logic](backend/app/domain2/clinical_logic.py).
 
@@ -131,7 +131,7 @@ The prototype **does not diagnose blood clots, osteoporosis, SANS, infection or 
 
 #### 1. GitHub repository
 
-Use [**LAYMmMz/TeamRocket**](https://github.com/LAYMmMz/TeamRocket). The currently published integration source is `feat/frontend-backend-api-integration` (the repository's current default branch). Do not deploy files from `archive/` or assume a historical `main` branch contains this integration. Keep backend and frontend changes together in the same review workflow and check GitHub Actions before publishing.
+Use [**LAYMmMz/TeamRocket**](https://github.com/LAYMmMz/TeamRocket). **`main` is the active default and Vercel production branch**, containing the merged frontend, FastAPI and Supabase integration (PRs #10–#12). The only other retained development branch is **`draft`**, which contains unmerged clinical-evidence work; do not deploy it to production until reviewed. Keep historical alternatives under `archive/` out of production builds. Check GitHub Actions before release.
 
 #### 2. Supabase database (existing TeamRocket project)
 
@@ -145,7 +145,7 @@ Use [**LAYMmMz/TeamRocket**](https://github.com/LAYMmMz/TeamRocket). The current
 
 Existing instance: [**TeamRocket-Astronaut-Health**](https://railway.com/) → staging → `teamrocket-fastapi`.
 
-Create/link a Railway service from this GitHub repository, deploying the integration branch. Configure:
+The existing Railway staging service currently uses GitHub repository `LAYMmMz/TeamRocket`, at the reviewed production integration commit. For future deployments, build from reviewed commits on `main` and verify its health and security tests. Configure:
 
 | Railway setting | Value |
 | --- | --- |
@@ -170,7 +170,7 @@ Also set `LOCAL_ENCRYPTION_KEY` (persistent **Fernet** key), `OFFLINE_GRANT_SECR
 
 Existing project: [**teamrocket-rocketpulse on Vercel**](https://vercel.com/laymmmzs-projects/teamrocket-rocketpulse).
 
-In Vercel, import/connect **`LAYMmMz/TeamRocket`**, use the **current integration/default branch** as Production Branch, and set:
+In Vercel, import/connect **`LAYMmMz/TeamRocket`**, use **`main`** as the Production Branch, and set:
 
 | Vercel setting | Value |
 | --- | --- |
@@ -200,6 +200,8 @@ Open these URLs in a private/incognito browser and verify **JSON**, not `index.h
 | [Crew command API](https://teamrocket-rocketpulse.vercel.app/api/v1/public/missions/DEMO-01/command?astronaut_id=CREW-01) | HTTP 200; `data_source=supabase-approved-synthetic` |
 | [Crew trends API](https://teamrocket-rocketpulse.vercel.app/api/v1/public/measurements/trends?astronaut_id=CREW-01) | 24 historical synthetic chart points |
 | [Cabin domain API](https://teamrocket-rocketpulse.vercel.app/api/v1/public/reports/domains/cabin?astronaut_id=CREW-01) | HTTP 200 and synthetic CO₂ sample |
+| [Live 57-table Data Tables](https://teamrocket-rocketpulse.vercel.app/data-model) | Verified schema snapshot, inspection time, and approved synthetic seed counts |
+| [Approved schema API](https://teamrocket-rocketpulse.vercel.app/api/v1/public/schema/catalog) | HTTP 200, `source=supabase-approved-schema-snapshot`, `verified_tables=57` |
 | Private `/api/v1/missions/DEMO-01/command?astronaut_id=CREW-01` | **401 without Supabase user JWT**; expected |
 | Public `POST /api/v1/public/...` | **405**; public modifications forbidden |
 
