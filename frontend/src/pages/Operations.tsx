@@ -150,7 +150,7 @@ export function DataModelPage(){
       {live&&<> · {live.starter_field_count} starter fields checked</>}
      </div>
      {live?.missing_starter_fields.length?<div className="rule-caption">Missing fields: {live.missing_starter_fields.join(', ')}</div>:null}
-     <div className="rule-caption">Tagged synthetic seed rows: {live?.published_synthetic_rows==null?'Not published':live.published_synthetic_rows.toLocaleString()}</div>
+     <div className="rule-caption">Tagged synthetic seed rows: <strong>{live?.published_synthetic_rows==null?'Not published':live.published_synthetic_rows.toLocaleString()}</strong></div>
     </article>
    })}</div>:
    <div className="schema-grid">{spec.offline_tables.map(t=><article className="schema-card" key={t.name}>
