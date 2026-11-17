@@ -188,6 +188,42 @@ class PublicSyntheticTests(unittest.TestCase):
             "/api/v1/public/reports/domains/sleep_notes?astronaut_id=CREW-01"
         ).status_code, 404)
 
+    def test_schema_catalog_reads_only_approved_metadata_and_validates_completeness(self):
+        from app.integrations.public_demo_api import CANONICAL_SCHEMA_NAMES
+        entries = [{
+            "table_name": name,
+            "table_present": True,
+            "starter_fields_verified": True,
+            "starter_field_count": 4,
+            "missing_starter_fields": [],
+            "published_synthetic_rows": 8880 if name == "vital_signs" else None,
+            "inspected_at": "2026-11-17T08:46:10+00:00",
+            "approved_for_public": True,
+            "source_label": "verified_supabase_metadata_snapshot",
+        } for name in sorted(CANONICAL_SCHEMA_NAMES)]
+        StubHTTP.items = entries
+        res = self.client.get("/api/v1/public/schema/catalog")
+        self.assertEqual(res.status_code, 200, res.text)
+        obj = res.json()
+        self.assertEqual(obj["source"], "supabase-approved-schema-snapshot")
+        self.assertEqual(obj["expected_tables"], 57)
+        self.assertEqual(obj["verified_tables"], 57)
+        self.assertEqual(len(obj["tables"]), 57)
+        self.assertEqual(next(x for x in obj["tables"] if x["name"] == "vital_signs")["published_synthetic_rows"], 8880)
+        url, params, headers = StubHTTP.calls[-1]
+        self.assertTrue(url.endswith("/rest/v1/rocketpulse_public_schema_catalog"))
+        self.assertEqual(params["approved_for_public"], "eq.true")
+        self.assertNotIn("Authorization", headers)
+        self.assertNotIn("service_role", str(headers))
+        StubHTTP.items = entries[:-1]
+        self.assertEqual(self.client.get("/api/v1/public/schema/catalog").status_code, 503)
+        StubHTTP.items = entries[:-1] + [dict(entries[-1], table_name="secret_notes")]
+        self.assertEqual(self.client.get("/api/v1/public/schema/catalog").status_code, 503)
+        StubHTTP.items = entries[:-1] + [dict(entries[-1], approved_for_public=False)]
+        self.assertEqual(self.client.get("/api/v1/public/schema/catalog").status_code, 503)
+        StubHTTP.items = entries[:-1] + [dict(entries[-1], published_synthetic_rows=-5)]
+        self.assertEqual(self.client.get("/api/v1/public/schema/catalog").status_code, 503)
+
     def test_private_api_and_public_write_stay_protected(self):
         self.assertEqual(self.client.get(
             "/api/v1/missions/DEMO-01/command?astronaut_id=CREW-01"

@@ -7,6 +7,7 @@ import {useMission} from '../app/MissionContext';
 import {useAutoSync} from '../app/AutoSyncContext';
 import {domainLabel} from '../app/labels';
 import {api,dataMode} from '../lib/api';
+import type {PublicSchemaCatalog} from '../lib/api';
 import {featureStatus} from '../lib/featureStatus';
 import {useDomainRecords} from '../app/useDomainRecords';
 import {useScenarioEvidence} from '../app/useScenarioEvidence';
@@ -85,12 +86,81 @@ export function IntegrationPage(){const {isDemo,isPublic,apiError,refresh}=useMi
  <Panel title="Acceptance gate checklist" sub="G1 TO G6"><div className="gate-grid">{[{a:'G1',t:'Database / identity',x:'57 tables, RLS, migrations, deterministic seed'},{a:'G2',t:'Offline platform',x:'Six SQLite tables, protected keys, restart durability'},{a:'G3',t:'Core monitoring',x:'Pydantic ingest and S01–S04, S10, S11'},{a:'G4',t:'Dashboards',x:'Seven navigable views and scoped backend access'},{a:'G5',t:'Research modules',x:'Reviewed examinations, labs, radiation and environment'},{a:'G6',t:'Sync and demo',x:'S10–S12, deduplication, audit and receipts'}].map(g=><div key={g.a}><b>{g.a}</b><strong>{g.t}</strong><p>{g.x}</p></div>)}</div></Panel>
  <Notice warning>Public access reads only approved synthetic records in a separate Supabase RLS table. Protected writes and automatic cloud synchronization require a signed-in mission account; the public view cannot send or modify clinical data. Synthetic sample data is not a clinically validated monitoring system.</Notice>
  </main>}
-export function DataModelPage(){const navigate=useNavigate();const query=new URLSearchParams(window.location.search).get('table')||'';const [q,setQ]=useState(query);const [group,setGroup]=useState('all');const [onlyOffline,setOnlyOffline]=useState(false);
- const matching=spec.tables.filter(t=>(group==='all'||t.group===group)&&(t.name+' '+t.columns.join(' ')).toLowerCase().includes(q.toLowerCase()));const groups=[...new Set(spec.tables.map(t=>t.group))];return <main className="page"><Head eyebrow="CANONICAL DATABASE CATALOG" title="57-Table Data Model" description="All logical Supabase tables and starter fields are transcribed from MasterDocs pages 3–5, with offline SQLite schema from page 6. These are data contracts, not deployed migrations." actions={<Link className="outline-cta" to="/integration"><Layers3 size={14}/> Architecture</Link>}/>
- <div className="overview-stats"><Stat label="POSTGRES TABLES" value={spec.tables.length}/><Stat label="SQLITE TABLES" value={spec.offline_tables.length}/><Stat label="SOURCE VERSION" value="2026-11-15"/><Stat label="SCHEMA STATUS" value="NOT VERIFIED" detail="Catalog is not a database inspection"/></div>
- <div className="filterbar"><label><Search size={15}/><input placeholder="Table or column name" value={q} onChange={e=>{setQ(e.target.value);navigate(`/data-model?table=${encodeURIComponent(e.target.value)}`,{replace:true})}}/></label><select value={group} onChange={e=>setGroup(e.target.value)}><option value="all">All cloud table groups</option>{groups.map(g=><option key={g} value={g}>{g}</option>)}</select><button className="small-button" onClick={()=>setOnlyOffline(v=>!v)}><Filter size={13}/>{onlyOffline?'Show cloud tables':'View offline tables'}</button></div>
- {!onlyOffline?<div className="schema-grid">{matching.map(t=><article className="schema-card" key={t.name}><div className="schema-group">{t.group}</div><h3>{t.name}</h3><div className="field-cloud">{t.columns.map(f=><code key={f}>{f}</code>)}</div></article>)}</div>:<div className="schema-grid">{spec.offline_tables.map(t=><article className="schema-card" key={t.name}><div className="schema-group">ONBOARD SQLITE → {t.cloud}</div><h3>{t.name}</h3><div className="field-cloud">{t.fields.map(f=><code key={f}>{f}</code>)}</div></article>)}</div>}
- <MapNotice/></main>}
+export function DataModelPage(){
+ const navigate=useNavigate();
+ const query=new URLSearchParams(window.location.search).get('table')||'';
+ const [q,setQ]=useState(query);
+ const [group,setGroup]=useState('all');
+ const [onlyOffline,setOnlyOffline]=useState(false);
+ const [catalog,setCatalog]=useState<PublicSchemaCatalog|null>(null);
+ const [loading,setLoading]=useState(true);
+ const [error,setError]=useState<string|null>(null);
+ const [refreshKey,setRefreshKey]=useState(0);
+ useEffect(()=>{
+  const controller=new AbortController();
+  setLoading(true);
+  setError(null);
+  api.schemaCatalog(controller.signal).then(data=>{
+   if(controller.signal.aborted)return;
+   if(data.source!=='supabase-approved-schema-snapshot'||!Array.isArray(data.tables)){
+    throw new Error('Invalid database catalog source');
+   }
+   setCatalog(data);
+  }).catch(err=>{
+   if(!controller.signal.aborted){
+    setCatalog(null);
+    setError(err instanceof Error?err.message:'Database catalog unavailable');
+   }
+  }).finally(()=>{if(!controller.signal.aborted)setLoading(false)});
+  return ()=>controller.abort();
+ },[refreshKey]);
+ const matching=spec.tables.filter(t=>(group==='all'||t.group===group)&&
+  (t.name+' '+t.columns.join(' ')).toLowerCase().includes(q.toLowerCase()));
+ const groups=[...new Set(spec.tables.map(t=>t.group))];
+ const liveByName=new Map(catalog?.tables.map(t=>[t.name,t])??[]);
+ const verified=Boolean(catalog&&catalog.expected_tables===spec.tables.length&&catalog.verified_tables===spec.tables.length);
+ const checkedAt=catalog?new Date(catalog.inspected_at).toLocaleString():'Not yet available';
+ return <main className="page">
+  <Head eyebrow="CANONICAL DATABASE CATALOG" title="57-Table Data Model"
+   description="MasterDocs table contracts alongside a verified, read-only Supabase schema snapshot. Published counts describe tagged synthetic test seeds only—not protected crew records."
+   actions={<Link className="outline-cta" to="/integration"><Layers3 size={14}/> Architecture</Link>}/>
+  <div className="overview-stats">
+   <Stat label="POSTGRES TABLES" value={catalog?.expected_tables??spec.tables.length} detail={catalog?'Reported by Supabase':'PDF expected count'}/>
+   <Stat label="SQLITE TABLES" value={spec.offline_tables.length} detail="PDF offline specification (not cloud verified)"/>
+   <Stat label="SUPABASE VERIFIED FIELDS" value={catalog?`${catalog.verified_tables}/${catalog.expected_tables}`:loading?'CHECKING':'UNAVAILABLE'} detail={catalog?'Starter fields in approved snapshot':'No live database inspection returned'}/>
+   <Stat label="SCHEMA STATUS" value={verified?'VERIFIED':loading?'CHECKING':catalog?'REVIEW':'UNAVAILABLE'}
+    detail={catalog?`Inspected ${checkedAt}`:'Database metadata unavailable—not assumed verified'}/>
+  </div>
+  {error?<Notice warning>Supabase catalog request failed: {error}. Showing the PDF field definitions only; database status is not verified.</Notice>:
+   catalog?<Notice><ShieldCheck size={15}/> Supabase metadata inspected at {checkedAt}. {catalog.verified_tables} of {catalog.expected_tables} cloud tables contain the expected starter fields. Only approved synthetic seed counts are published; all private clinical records remain protected. This is an operator-refreshed snapshot, not a real-time count of all database rows.</Notice>:
+   <Notice>Checking the approved Supabase schema snapshot. The PDF catalog remains visible while the request runs.</Notice>}
+  <div className="filterbar">
+   <label><Search size={15}/><input placeholder="Table or column name" value={q} onChange={e=>{setQ(e.target.value);navigate(`/data-model?table=${encodeURIComponent(e.target.value)}`,{replace:true})}}/></label>
+   <select value={group} onChange={e=>setGroup(e.target.value)}><option value="all">All cloud table groups</option>{groups.map(g=><option key={g} value={g}>{g}</option>)}</select>
+   <button className="small-button" onClick={()=>setOnlyOffline(v=>!v)}><Filter size={13}/>{onlyOffline?'Show cloud tables':'View offline tables'}</button>
+   <button className="small-button" type="button" disabled={loading} onClick={()=>setRefreshKey(k=>k+1)}><RefreshCw size={13}/>{loading?'Checking…':'Refresh status'}</button>
+  </div>
+  {!onlyOffline?<div className="schema-grid">{matching.map(t=>{
+    const live=liveByName.get(t.name);
+    return <article className="schema-card" key={t.name}>
+     <div className="schema-group">{t.group}</div><h3>{t.name}</h3>
+     <div className="field-cloud">{t.columns.map(f=><code key={f}>{f}</code>)}</div>
+     <div className="rule-caption">
+      <strong>{live?(live.starter_fields_verified?'SUPABASE VERIFIED':live.table_present?'FIELD MISMATCH':'TABLE NOT FOUND'):'DATABASE STATUS UNAVAILABLE'}</strong>
+      {live&&<> · {live.starter_field_count} starter fields checked</>}
+     </div>
+     {live?.missing_starter_fields.length?<div className="rule-caption">Missing fields: {live.missing_starter_fields.join(', ')}</div>:null}
+     <div className="rule-caption">Tagged synthetic seed rows: <strong>{live?.published_synthetic_rows==null?'Not published':live.published_synthetic_rows.toLocaleString()}</strong></div>
+    </article>
+   })}</div>:
+   <div className="schema-grid">{spec.offline_tables.map(t=><article className="schema-card" key={t.name}>
+    <div className="schema-group">ONBOARD SQLITE → {t.cloud}</div><h3>{t.name}</h3>
+    <div className="field-cloud">{t.fields.map(f=><code key={f}>{f}</code>)}</div>
+    <div className="rule-caption">Offline schema specification—not verified by this cloud snapshot.</div>
+   </article>)}</div>}
+  <MapNotice/>
+ </main>
+}
 function featureDest(id:string){const n=Number(id.slice(1));if(n>=40&&n<=46){const page=spec.views.find(v=>v.feature_id===id);return `/${page?.id??'command'}`};if(id==='F47')return '/simulation';const d=spec.domains.find(v=>v.feature_ids.includes(id));if(d)return `/domains/${d.id}`;if(['F07','F08','F09','F38'].includes(id))return '/cases';if(['F11','F12'].includes(id))return '/integration';return '/data-model'}
 export function FeatureRegistryPage(){const {isDemo,isPublic}=useMission();const [q,setQ]=useState('');const [priority,setPriority]=useState('All');const [tab,setTab]=useState<'features'|'hazards'>('features');const matches=spec.features.filter(f=>(priority==='All'||f.priority===priority)&&`${f.id} ${f.title}`.toLowerCase().includes(q.toLowerCase()));return <main className="page"><Head eyebrow="MASTERDOCS REQUIREMENTS / TRACEABILITY" title="47-Feature Coverage" description="The complete feature register from the definitive PDF. Every ID has a frontend entry point; implementation and backend acceptance are tracked separately." actions={<StatusPill kind="pending">FULL END-TO-END ACCEPTANCE PENDING</StatusPill>}/>
  <div className="overview-stats"><Stat label="TOTAL DELIVERABLES" value="47"/><Stat label="P0" value={spec.features.filter(x=>x.priority==='P0').length}/><Stat label="P1" value={spec.features.filter(x=>x.priority==='P1').length}/><Stat label="P2" value={spec.features.filter(x=>x.priority==='P2').length}/></div>
