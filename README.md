@@ -1,234 +1,203 @@
 # 🚀 RocketPulse — Astronaut Health Monitoring
-### TeamRocket | NASA Space Apps Challenge
 
-**One place to understand astronaut health, recognize concerning changes, and support timely medical review.**
+**TeamRocket · NASA Space Apps Challenge · Synthetic-data research prototype**
 
-[**🌐 Try the live demo (no login required)**](https://teamrocket-rocketpulse.vercel.app) · [**👩‍🚀 Open the crew dashboard**](https://teamrocket-rocketpulse.vercel.app/command) · [**🔎 Check our feature coverage**](frontend/docs/FEATURE_MATRIX.md)
+**RocketPulse helps a mission team see fragmented astronaut-health observations in one place, trace their sources, and recognize what needs human medical review—without treating missing data as normal.**
 
-> **For judges:** RocketPulse is a **research prototype using fictional astronauts and synthetic measurements**. Its public demo connects a real React interface, Python FastAPI backend, and Supabase database. It is **not** a medical device, a NASA flight system, or a validated tool for diagnosing health conditions.
+[**🌐 Launch the live demo**](https://teamrocket-rocketpulse.vercel.app/command) · [**🧭 Follow the judge walkthrough**](#-3-minute-judge-walkthrough) · [**🗃️ Inspect Supabase verification**](https://teamrocket-rocketpulse.vercel.app/data-model) · [**📋 Explore the 47-feature matrix**](frontend/docs/FEATURE_MATRIX.md)
 
----
+> **Important for judges:** This is an independently built **educational/research prototype**, not a NASA-operated system or medical device. All public crew identifiers and observations are **fictional and synthetic**. Our public site demonstrates a genuine **React → FastAPI → Supabase** read path; it does **not** claim that all 47 clinical workflows, 12 end-to-end acceptance scenarios, or offline-to-cloud synchronization are complete.
 
-## 🌍 The challenge
+## 🎯 The problem and our approach
 
-Spaceflight changes the human body. Astronauts may experience **bone and muscle loss, cardiovascular changes, blood-clot concerns, visual changes, altered sleep, radiation exposure, and stress**. Medical information can also arrive from different sensors, examination reports, and manual crew check-ins—sometimes with limited connectivity.
+During a mission, cardiovascular readings, environmental observations, symptoms, exercise history, examination reports and laboratory results may come from different sources. When communication is delayed, a medical reviewer must understand **who** a record concerns, **when** it was measured, **where** it came from, and **whether** it is verified.
 
-**The problem we're addressing:** How can a crew and its supporting medical team see relevant health information in one place, recognize what needs review, and avoid mistaking missing or unverified data for a healthy reading?
+RocketPulse organizes this evidence into a mission-control interface designed around three principles: **(1)** source-aware monitoring across crew and habitat, **(2)** honest missing/stale/simulated-data states, and **(3)** human authorization and review for clinical decisions. Our design follows the team's *NASA Astronaut Health Monitoring System — Final Development MasterDocs*, edition **15 November 2026**.
 
-## 💡 Our solution
+## ▶️ 3-minute judge walkthrough
 
-**RocketPulse** brings together astronaut health observations, trends, symptoms, medical examinations, and mission environmental context in a single monitoring experience.
+**Start here: [teamrocket-rocketpulse.vercel.app/command](https://teamrocket-rocketpulse.vercel.app/command). No login is required for the public synthetic demo.**
 
-Our design follows three principles:
-
-1. **See the whole picture.** Organize crew vitals and specialized evidence such as vascular scans, bone-density examinations and laboratory results.
-2. **Make uncertainty visible.** Label synthetic and unverified data, preserve its source, and show missing measurements as **unavailable**, not normal.
-3. **Keep people in charge.** Support incident and clinical-review workflows instead of automatically diagnosing conditions or recommending treatment.
-
-The project combines a **seven-dashboard frontend**, a **Python backend**, **Supabase PostgreSQL** for cloud data, and **SQLite** for offline-first prototype workflows. The wider specification maps **47 features across 12 monitoring domains**; **not all features are fully implemented, live, or clinically validated**.
-
-## ▶️ Try RocketPulse in about 2 minutes
-
-**[Open the live RocketPulse demo](https://teamrocket-rocketpulse.vercel.app/command)** — no account is needed.
-
-| Step | What to do | What it demonstrates |
+| Step | Try this | What you can verify |
 | --- | --- | --- |
-| **1. Choose an astronaut** | Select **CREW-01**, **CREW-02**, **CREW-03** or **CREW-04**. | A crew-specific view of a fictional mission. |
-| **2. Explore vital signs** | Look at **heart rate, blood pressure, oxygen saturation (SpO₂), respiratory measurements**, and their history. | Approved synthetic measurements retrieved from Supabase through FastAPI. |
-| **3. Explore the visual interface** | View the **3D astronaut explorer** and switch between dashboard areas. | How different health domains can be organized for fast review. |
-| **4. Check the habitat** | Go to **Health Systems → Cabin** and inspect the sample **CO₂** reading. | Crew health can be viewed alongside mission-environment context. |
-| **5. Inspect the system connection (optional)** | Open the [public JSON API](https://teamrocket-rocketpulse.vercel.app/api/v1/public/missions/DEMO-01/command?astronaut_id=CREW-01). | The response identifies its source as `supabase-approved-synthetic`. |
+| **1 · Mission overview** | Open [Mission Medical Command](https://teamrocket-rocketpulse.vercel.app/command) and choose **CREW-01**; switch to another fictional crew member. | Crew-specific synthetic mission observations, timestamps and status labels. |
+| **2 · Health readings** | Visit [Individual Astronaut Health](https://teamrocket-rocketpulse.vercel.app/individual) and the [Health Systems catalog](https://teamrocket-rocketpulse.vercel.app/domains). | Trends and domain records retrieved through the public FastAPI/Supabase feed where approved samples exist. |
+| **3 · Interactive explorer** | Open the [3D Crew Health Explorer](https://teamrocket-rocketpulse.vercel.app/explorer) and select body regions. | A navigable body-to-health-domain interface—not a medical scan. |
+| **4 · Mission context** | Open the [Cabin Environment domain](https://teamrocket-rocketpulse.vercel.app/domains/cabin). | Synthetic habitat readings, including CO₂ examples with source information. |
+| **5 · Evidence and scenarios** | Open [Mission Scenarios](https://teamrocket-rocketpulse.vercel.app/simulation), then choose S04 or S07. | Related database samples alongside scenario requirements, **not** falsely labeled executed or passed tests. |
+| **6 · Real database proof** | Open [Data Tables](https://teamrocket-rocketpulse.vercel.app/data-model). | An operator-verified **57-table Supabase starter-field snapshot**, inspection timestamp and approved synthetic seed counts. |
 
-**Direct links:** [Live app](https://teamrocket-rocketpulse.vercel.app) · [Crew API](https://teamrocket-rocketpulse.vercel.app/api/v1/public/missions/DEMO-01/command?astronaut_id=CREW-01) · [Backend health](https://teamrocket-rocketpulse.vercel.app/api/health)
+For a machine-readable connection check, open the [public crew JSON API](https://teamrocket-rocketpulse.vercel.app/api/v1/public/missions/DEMO-01/command?astronaut_id=CREW-01) or [approved schema JSON API](https://teamrocket-rocketpulse.vercel.app/api/v1/public/schema/catalog). The public API has **no private clinical write access**.
 
-## 🩺 What health risks does RocketPulse cover?
+## 🛰️ What is in the project?
 
-The table below describes the **project's monitoring scope**, not a claim that every examination is available in the public demo.
+The MasterDocs defines **five spaceflight hazards**, **12 monitoring domains**, **seven role-oriented dashboards**, **47 feature deliverables**, **57 cloud tables**, **six onboard SQLite tables** and **12 required scenarios**. These numbers describe the **required scope**; they are not a claim of complete acceptance.
 
-| Health area | Why it matters | What RocketPulse organizes |
+**Five hazards:** Space Radiation · Isolation & Confinement · Distance from Earth · Gravity Fields · Hostile / Closed Environments.
+
+**Twelve health/mission domains:** Cardiovascular & Respiratory; Vascular/Thrombosis; Radiation; Gravity/Vestibular; Fitness/Muscle; Bone; Vision/SANS; Immune/Infection; Sleep/Behavior; Cabin Environment; Environmental Microbiology; Autonomous Medical Operations.
+
+### Seven dashboard views
+
+All seven PDF-defined dashboard **routes** exist and can be opened. A navigable screen is not automatically a completed medical workflow.
+
+| MasterDocs dashboard | Public route | Intended focus |
 | --- | --- | --- |
-| 🩸 **Blood clots (thrombosis)** | Changes in circulation can require careful medical evaluation. | **D-dimer blood-test reports**, left/right **vascular ultrasound** findings, symptoms, and clinician review. **No automatic clot diagnosis.** |
-| 🦴 **Bone-density loss** | Extended time in microgravity can affect bones. | **DXA/DEXA scan records**, bone mineral density by body region, and preflight/postflight comparisons. **No invented in-flight scans.** |
-| ❤️ **Heart and circulation** | The cardiovascular system adapts to altered gravity and physical activity. | Heart rate, blood pressure, ECG records and individual baselines. |
-| 🫁 **Breathing and oxygen** | Respiratory changes and concerning symptoms need attention. | Oxygen saturation, breathing rate and symptom reports—even when a sensor reading is missing. |
-| 👁️ **Vision changes / SANS** | Spaceflight can affect the eyes and visual system. | OCT eye imaging, visual acuity, eye-specific findings and follow-up records. |
-| 💪 **Muscle and fitness** | Muscle strength and exercise capacity can change during missions. | Exercise sessions, workload, physical assessments and recovery context. |
-| ☢️ **Radiation exposure** | Crews and habitats can be exposed to ionizing radiation. | Personal/area dose records, solar-event context and review of measurement quality. |
-| 🌡️ **Cabin environment** | Air quality and habitat conditions influence crew wellbeing. | CO₂, cabin pressure, temperature, humidity, light and noise measurements. |
-| 🧪 **Immune health and infection** | Testing and sample history support investigation of biological risks. | Blood/other samples, lab assays, microbial tests, and sequencing metadata. |
-| 😴 **Sleep, nutrition and wellbeing** | Sleep, hydration, nutrition and behavioral health affect readiness. | Sleep logs, nutrition and fluid balance, and privacy-restricted check-ins. |
-| 🧭 **Gravity adaptation and cognition** | Transitioning between gravity conditions affects adaptation and functioning. | Gravity transition notes, vestibular/functional assessments and symptom histories. |
-| 🚑 **Medical response and continuity** | Important findings need documentation, follow-up and review. | Alerts, incidents, exam schedules, approved procedure references, inventory and audit records. |
+| Mission Medical Command (F40) | [Open](https://teamrocket-rocketpulse.vercel.app/command) | Crew overview, mission state and evidence navigation |
+| Individual Astronaut Health (F41) | [Open](https://teamrocket-rocketpulse.vercel.app/individual) | Vitals, observations, trends and history |
+| Clinical Examinations & Recovery (F42) | [Open](https://teamrocket-rocketpulse.vercel.app/examinations) | Vascular, eye, bone, fitness and examination review |
+| Radiation & Environment (F43) | [Open](https://teamrocket-rocketpulse.vercel.app/environment) | Dose, habitat and environmental context |
+| Laboratory & Immune Health (F44) | [Open](https://teamrocket-rocketpulse.vercel.app/laboratory) | Samples, assay results and research evidence |
+| Crew Self-Assessment (F45) | [Open](https://teamrocket-rocketpulse.vercel.app/crew) | Symptoms, fatigue and restricted self-reports |
+| Ground Medical Review (F46) | [Open](https://teamrocket-rocketpulse.vercel.app/ground) | Clinical review, incidents and synchronization concepts |
 
-**Examples of safety-aware design:**
-- A **D-dimer result** is evidence for medical review—not proof of a blood clot.
-- **Bone-density comparisons** require the same anatomical region and appropriate scan method; the system does not fabricate in-flight DXA scans.
-- **Missing SpO₂** does not suppress a serious breathing-symptom report.
-- **Radiation totals** are only compared when quantities, units and time intervals are compatible.
-- **Sensitive behavioral data** is restricted, not shared on the public dashboard.
+**Protected clinical addition (PR #13):** Authorized `admin` / `flight_surgeon` roles can request **synthetic local SQLite** examination and laboratory evidence in development/test API mode. These readers preserve ultrasound laterality, OCT eye/region, pre-/postflight DXA context, assay methods, and sample custody. They are **not public Supabase clinical-record endpoints**, and the judge-facing no-login site does not reveal their records.
 
-For the source-verified acceptance gaps, see [the MasterDocs implementation audit](docs/MASTERDOCS_IMPLEMENTATION_AUDIT.md).
+## ✅ What is verified vs. still being developed?
 
-For a full feature-by-feature checklist, see [the 47-feature matrix](frontend/docs/FEATURE_MATRIX.md).
+| Capability | Evidence available now | Boundary / remaining work |
+| --- | --- | --- |
+| **Public web application** | Deployed React/TypeScript/Vite frontend on Vercel; accessible without a user account | A working page is not clinical certification |
+| **Database-backed public observations** | FastAPI on Railway reads approved synthetic Supabase samples for crew/health domains | No real astronaut or sensor telemetry |
+| **Cloud inventory** | **57/57** canonical table names and mandatory starter fields verified in a **published, operator-refreshed metadata snapshot** | Not an audit of every foreign key, data type, permission or operational workflow |
+| **Synthetic cloud test data** | Seeded examples include **8,880 vitals**, **720 cabin CO₂ readings**, **120 sleep sessions**, **24 biological samples**, and **32 laboratory results** | These are *protected, deliberately simulated test rows*; counts published publicly are restricted to approved seed identifiers |
+| **Public demonstration feed** | **428 approved synthetic observations**, isolated from protected clinical tables at the recorded database audit | Anon/public mode cannot read or write protected medical records |
+| **Dashboard and feature scope** | Seven dashboards, 12 domain views, 47-feature traceability index, five hazards and 12 scenario descriptions | The full 47-feature acceptance matrix is **not yet passed** |
+| **Protected examination/laboratory reader** | Role- and mission-checked FastAPI → local SQLite synthetic evidence, with automated tests | Available only to authorized development/test API sessions, not to anonymous judges or as verified cloud clinical reads |
+| **Offline and clinical synchronization** | SQLite/outbox architecture and prototype modules exist | Fresh restart/reconnect, exact cloud receipts and deduplication are **not fully verified end to end** |
+| **S01–S12 acceptance** | Scenario definitions and local-test reporting exist | **All 12 deployed end-to-end scenarios are not yet verified**; the scenario selector is not a test executor |
 
-## ✅ What's working, and what's still a prototype?
+See [feature-by-feature coverage](frontend/docs/FEATURE_MATRIX.md), [PDF alignment and gaps](docs/PDF_ALIGNMENT_STATUS.md), [cloud schema and seed reconciliation](docs/MASTERDOCS_CLOUD_RECONCILIATION_20261117.md), and [reviewed clinical-evidence integration](docs/REVIEWED_DRAFT_CLINICAL_EVIDENCE.md).
 
-| Capability | Status for this submission |
+> **Interpretation of “57/57 verified”:** The published schema inspection established that **the required table names and starter-field names exist**. It does **not** mean that all tables are full, all SQL constraints match MasterDocs, or all 57 business workflows have been implemented. The snapshot is refreshed by a trusted database operator; reloading the browser does not re-inspect protected tables.
+
+## 🏗️ Architecture and data protection
+
+### Public, no-login demonstration — deployed
+
+~~~text
+Judge's browser
+  React + TypeScript + Vite  (Vercel)
+          │ GET only /api/v1/public/*
+          ▼
+  Python FastAPI              (Railway)
+          │ validated, restricted requests
+          ▼
+  Supabase PostgreSQL
+     ├── approved synthetic observation feed
+     └── approved 57-table schema metadata snapshot
+
+  Protected medical tables remain behind authorization/RLS.
+~~~
+
+### Separate protected, local-first research architecture
+
+~~~text
+Authorized mission client
+    → FastAPI validation + clinical/role controls
+    → onboard/local encrypted SQLite
+    → outbox / sync queue
+    → authorized Supabase ingestion and receipts (integration gate pending)
+~~~
+
+The public feed and schema catalog are **different publication surfaces**. Neither publishes confidential check-ins, raw clinical table contents, privileged keys, medical diagnoses or user tokens. Public read access does **not** grant INSERT/UPDATE/DELETE. The new local clinical-evidence endpoints require authorization and are not replacements for the private cloud data pipeline.
+
+The interface intentionally distinguishes missing data, stale/unsupported observations, synthetic values, and unverified clinical reports. It does **not** automatically diagnose clots, osteoporosis, SANS, infection or radiation illness; prescribe treatment; clear EVA; or actuate spacecraft. No arbitrary research threshold is presented as NASA-approved medical policy.
+
+## 🧪 MasterDocs acceptance and scientific integrity
+
+The 15 November 2026 MasterDocs defines six release gates:
+
+| Gate | Acceptance goal | Present assessment |
+| --- | --- | --- |
+| G1 · Database & identity | Clean migrations, 57 tables, relationships, RLS, deterministic seed | Table/field snapshot and synthetic seeds checked; clean-room migration, all FK/RLS assertions pending |
+| G2 · Offline platform | Six SQLite operational tables, encryption, durable data across restart | Prototype code exists; full restart/reconnect proof pending |
+| G3 · Core monitoring | Validated ingest, baseline, symptoms, rules, alerts/incidents | Partial implementation; S01–S04/S10/S11 full proof pending |
+| G4 · Dashboards | Seven navigable views, evidence provenance, role protection | Routes and UI built; protected actions/role acceptance not fully certified |
+| G5 · Research modules | Exams, assays, radiation, microbiology and review workflows | Selected synthetic examples and protected local readers; full source-aware acceptance pending |
+| G6 · Sync & final demo | Cloud receipts, idempotence, audit and reproducible S01–S12 | Not yet proven end to end |
+
+**Research principles used in the prototype:** D-dimer does not diagnose a clot; Doppler/ultrasound findings preserve vessel side; OCT preserves eye/region; bone DXA is pre/postflight only unless a valid in-flight source exists; dose measurements require compatible quantity, units and time interval; confidential behavioral check-ins require restricted access. Missing evidence is **unavailable**, not “normal.”
+
+Our local scenario test report deliberately says **`live_supabase_verified=false`** and **`all_deployed_scenarios_verified=false`**. A passing unit-test suite cannot substitute for an actual cloud-receipt demonstration.
+
+## 🗂️ Source code and reproducibility
+
+| Location | What it contains |
 | --- | --- |
-| Public React dashboard and 3D astronaut explorer | **Available to judges** without login |
-| Python FastAPI ↔ Supabase ↔ frontend data path | **Integrated for approved public synthetic reads** |
-| Crew-specific vitals, historical trends and cabin example | **Demonstrated using synthetic cloud records** |
-| Blood-clot, bone, OCT, lab and other specialized domain structures | **Schema designs and/or protected local synthetic staging contracts**; not all public or cloud-backed |
-| Authenticated alerts, incidents, examination and offline/sync components | **Backend prototype workflows** with role and mission boundaries; not all end-to-end cloud paths verified |
-| Full 47-feature acceptance, operational sensors and clinical diagnosis | **Not claimed** |
+| [`frontend/`](frontend/) | Vite/React dashboards, 3D body explorer, domain pages, integration client and public Data Tables |
+| [`backend/`](backend/) | FastAPI, local SQLite, role checks, data validation, integration routes and tests |
+| [`supabase/`](supabase/) | Cloud SQL migrations, explicit synthetic seeds, metadata-refresh SQL and preflight queries |
+| [`docs/`](docs/) | Requirement crosswalk, PDF alignment, architecture, deployment and verification notes |
+| [`archive/`](archive/) | Historical/alternate teammate implementations; **not used for deployment** |
 
-For the November 16, 2026 integration build, repository documentation reports **428 approved synthetic public measurement rows**, a **24-point** historical trend response, and a cabin example including **650 ppm CO₂**. These are **fixed demonstration readings, not live astronaut telemetry**. A backend health response proves service availability, not completion of protected clinical synchronization.
+**Default release branch: `main`.** Keep the other `draft` branch for its unreviewed fresh-schema SQL proposal; do not execute that 903-line script on the current Supabase project. PRs [#10](https://github.com/LAYMmMz/TeamRocket/pull/10), [#11](https://github.com/LAYMmMz/TeamRocket/pull/11), [#12](https://github.com/LAYMmMz/TeamRocket/pull/12) and [#13](https://github.com/LAYMmMz/TeamRocket/pull/13) are merged into `main`.
 
-Read the [implementation and acceptance audit](docs/PDF_ALIGNMENT_STATUS.md) for verified behavior and remaining work.
+### Run the frontend locally
 
-## 🧩 How the technology works
+Requirements: Node.js 24 (or the repository-compatible version), npm, and a running FastAPI service for connected public data.
 
-```text
-               JUDGES' WEB BROWSER
-          React + TypeScript dashboard
-                       |
-                public GET requests
-                       v
-             Python FastAPI backend
-                       |
-           approved read-only access
-                       v
-           Supabase PostgreSQL cloud
-              synthetic demo data
-
-Separate authenticated prototype workflows:
-  FastAPI → encrypted offline SQLite → sync queue
-         → authorized Supabase RPC (when configured)
-```
-
-- **Frontend:** React, TypeScript and Vite, deployed to **Vercel**.
-- **Backend:** Python and FastAPI, deployed to **Railway**.
-- **Cloud database:** **Supabase PostgreSQL**, with row-level security and an isolated read-only public feed.
-- **Offline storage:** Encrypted **SQLite**, with queueing and receipt-based synchronization in authorized workflows.
-
-The broader database design includes crew profiles, mission assignments, health observations, vascular ultrasound, bone scans, eye exams, laboratory results, environmental readings, alerts, incidents, inventory and audit records. **All 57 canonical PostgreSQL tables exist in the connected Supabase project, and their PDF starter-field presence was verified in an operator-refreshed snapshot.** This does not mean all 57 clinical workflows, constraints, or end-to-end scenarios have passed acceptance. [Live database verification](docs/LIVE_SUPABASE_DATA_TABLES.md).
-
-For reviewers interested in implementation details: [database inventory](frontend/docs/DATABASE_MAP.md) · [database architecture](database/docs/DatabaseSchema.md) · [backend modules and local setup](backend/README.md) · [frontend](frontend/) · [API integration](backend/app/integrations/) · [domain validation logic](backend/app/domain2/clinical_logic.py).
-
-## 🔐 Privacy, limitations and scientific responsibility
-
-RocketPulse uses **fictional crew members and synthetic data only** in its public demo. Public endpoints are **read-only**; protected clinical records, behavioral check-ins, clinical writes and mission-authorized synchronization are not open to visitors.
-
-The prototype **does not diagnose blood clots, osteoporosis, SANS, infection or other conditions**, prescribe medication, authorize mission activities, or replace qualified medical personnel. Clinical findings require appropriate source evidence, method and unit checks, and human review.
-
-## 🛠️ Technical setup and deployment
-
-**Judges can stop reading here and use the [live demo](https://teamrocket-rocketpulse.vercel.app).** The sections below are for developers and technical reviewers who want to reproduce or inspect the integration.
-
-### Deploy the integrated application
-
-> **How to host all three parts:** Vercel runs the **frontend**, Railway runs the **FastAPI backend** and persistent SQLite, and Supabase hosts the **cloud PostgreSQL database**. Vercel itself does not execute the FastAPI container or host PostgreSQL. The `frontend/vercel.json` rewrite connects them under **one public web address**.
-
-#### 1. GitHub repository
-
-Use [**LAYMmMz/TeamRocket**](https://github.com/LAYMmMz/TeamRocket). **`main` is the active default and Vercel production branch**, containing the merged frontend, FastAPI and Supabase integration (PRs #10–#12). The only other retained development branch is **`draft`**, which contains unmerged clinical-evidence work; do not deploy it to production until reviewed. Keep historical alternatives under `archive/` out of production builds. Check GitHub Actions before release.
-
-#### 2. Supabase database (existing TeamRocket project)
-
-- Project: **TeamRocketV2Database**, ID `ziecxjoeljxoocixejtz`.
-- Endpoint: `https://ziecxjoeljxoocixejtz.supabase.co`.
-- **This existing project already has the reviewed public feed installed.** For a different/new project, the project owner must review and execute [`supabase/manual/20261116_public_demo_feed.sql`](supabase/manual/20261116_public_demo_feed.sql) in that project's SQL Editor. This script creates/seeds **only** the isolated public demonstration table; it does **not** recreate all protected clinical tables or authentication configuration.
-- Confirm its final audit: `visible_to_anonymous=428` or more; anonymous `SELECT` permitted, anonymous `INSERT`, `UPDATE`, `DELETE` denied; RLS enabled. Never change the privileged `health_logs` or `ingest_sync_event` policies to make public demos work.
-- **Never put a Supabase `service_role`/secret key or database password in Vercel's `VITE_*` environment variables, public code, screenshots or commit history.**
-
-#### 3. Railway backend (Docker + persistent data)
-
-Existing instance: [**TeamRocket-Astronaut-Health**](https://railway.com/) → staging → `teamrocket-fastapi`.
-
-The existing Railway staging service currently uses GitHub repository `LAYMmMz/TeamRocket`, at the reviewed production integration commit. For future deployments, build from reviewed commits on `main` and verify its health and security tests. Configure:
-
-| Railway setting | Value |
-| --- | --- |
-| Builder | **Dockerfile**, path `backend/Dockerfile` |
-| Docker build context | Repository root (Dockerfile copies `backend/` and `docs/schema-handoff.json`) |
-| Health check | `/api/health` |
-| Public service URL (current) | `https://teamrocket-fastapi-staging.up.railway.app` |
-| Durable volume | Mount `/data` for encrypted SQLite and attachments |
-| `APP_ENV` | `test` for the *existing synthetic judge staging service*; do not label it a clinical production backend |
-| `SQLITE_PATH` | `/data/offline.db` |
-| `DEV2_DATABASE_URL` | `sqlite:////data/dev2_clinical.db` |
-| `ATTACHMENTS_ROOT` | `/data/attachments` |
-| `SCHEMA_MANIFEST_PATH` | `/srv/docs/schema-handoff.json` |
-| `SUPABASE_URL` | `https://ziecxjoeljxoocixejtz.supabase.co` |
-| `SUPABASE_ANON_KEY` | The project's **public publishable key** (Railway server variable, not a service-role secret) |
-| `SYNC_RPC_URL` | `https://ziecxjoeljxoocixejtz.supabase.co/rest/v1/rpc/ingest_sync_event` (private, mission-authorized sync only) |
-| `SYNC_ACCESS_TOKEN` | **Leave empty** — do not save a user's expiring JWT as a permanent worker secret |
-
-Also set `LOCAL_ENCRYPTION_KEY` (persistent **Fernet** key), `OFFLINE_GRANT_SECRET` (random 32+ characters), and the project's `AUTH_ISSUER`, `AUTH_JWKS_URL`, `AUTH_AUDIENCE=authenticated` for protected APIs. See [the backend setup guide](backend/README.md) for local development. **Do not rotate the Fernet key without an encrypted-data migration.** Keep the Railway service and its volume operational during judging.
-
-#### 4. Vercel frontend (public judge link)
-
-Existing project: [**teamrocket-rocketpulse on Vercel**](https://vercel.com/laymmmzs-projects/teamrocket-rocketpulse).
-
-In Vercel, import/connect **`LAYMmMz/TeamRocket`**, use **`main`** as the Production Branch, and set:
-
-| Vercel setting | Value |
-| --- | --- |
-| Framework Preset | **Vite** |
-| Root Directory | **`frontend`** |
-| Node.js Version | **24.x** |
-| Install Command | **`npm ci`** |
-| Build Command | **`npm run build`** |
-| Output Directory | **`dist`** |
-| Production `VITE_DATA_MODE` | **`public`** — not `demo` or `api` |
-| Production `VITE_API_BASE_URL` | **`/api/v1`** (same-origin proxy) |
-
-`VITE_DATA_MODE=public` bypasses the application's login screen and only calls the **GET-only**, synthetic Supabase-backed `/api/v1/public/*` API. `VITE_DATA_MODE=demo` uses local static browser fixtures (not database-backed); `VITE_DATA_MODE=api` is the **private** JWT-protected mode requiring user login.
-
-Ensure the production domain is **publicly accessible to judges**; if Vercel Deployment Protection redirects visitors to Vercel login, limit protection to previews in **Project Settings → Deployment Protection**. Click **Redeploy** after changing build-time environment variables: Vite embeds them during the build. If the Railway backend URL changes, update [`frontend/vercel.json`](frontend/vercel.json) and redeploy Vercel.
-
-After deployment, submit the **stable production URL**: **https://teamrocket-rocketpulse.vercel.app**, not a temporary preview/build URL.
-
-#### 5. Verify the complete judge deployment (no login)
-
-Open these URLs in a private/incognito browser and verify **JSON**, not `index.html`:
-
-| Test | Expected |
-| --- | --- |
-| [App homepage](https://teamrocket-rocketpulse.vercel.app) | RocketPulse dashboard, **no app or Vercel login** |
-| [FastAPI health through Vercel](https://teamrocket-rocketpulse.vercel.app/api/health) | JSON: `status=ok` |
-| [Crew command API](https://teamrocket-rocketpulse.vercel.app/api/v1/public/missions/DEMO-01/command?astronaut_id=CREW-01) | HTTP 200; `data_source=supabase-approved-synthetic` |
-| [Crew trends API](https://teamrocket-rocketpulse.vercel.app/api/v1/public/measurements/trends?astronaut_id=CREW-01) | 24 historical synthetic chart points |
-| [Cabin domain API](https://teamrocket-rocketpulse.vercel.app/api/v1/public/reports/domains/cabin?astronaut_id=CREW-01) | HTTP 200 and synthetic CO₂ sample |
-| [Live 57-table Data Tables](https://teamrocket-rocketpulse.vercel.app/data-model) | Verified schema snapshot, inspection time, and approved synthetic seed counts |
-| [Approved schema API](https://teamrocket-rocketpulse.vercel.app/api/v1/public/schema/catalog) | HTTP 200, `source=supabase-approved-schema-snapshot`, `verified_tables=57` |
-| Private `/api/v1/missions/DEMO-01/command?astronaut_id=CREW-01` | **401 without Supabase user JWT**; expected |
-| Public `POST /api/v1/public/...` | **405**; public modifications forbidden |
-
-**Troubleshooting:** If a public API URL shows the RocketPulse HTML shell, Vercel deployed the wrong source/branch or lost the `frontend/vercel.json` rewrites. If it returns **503**, check the Supabase feed table, read-only RLS policy, and Railway `SUPABASE_URL`/`SUPABASE_ANON_KEY` rather than exposing private tables. If a browser asks for a login, check `VITE_DATA_MODE=public` and Vercel Deployment Protection.
-
-### Local development and tests
-
-```powershell
+~~~bash
 git clone https://github.com/LAYMmMz/TeamRocket.git
-cd TeamRocket
-cd frontend
+cd TeamRocket/frontend
 npm ci
 npm run check:scope
 npm run build
 npm run dev
-```
+~~~
 
-For the **database-connected public** frontend locally, create an untracked `frontend/.env.local` containing `VITE_DATA_MODE=public` and `VITE_API_BASE_URL=/api/v1`. The local Vite server proxies `/api` to FastAPI at `127.0.0.1:8000`; run the configured backend alongside Vite. The hosted Vercel proxy is defined by `frontend/vercel.json`. For backend local tests, see [`backend/README.md`](backend/README.md). GitHub Actions runs the frontend build and integration API tests.
+For the database-connected frontend, create an untracked `frontend/.env.local`:
 
-### Additional data-protection notes
+~~~ini
+VITE_DATA_MODE=public
+VITE_API_BASE_URL=/api/v1
+~~~
 
-- The **public** dataset contains **428 clearly labelled synthetic rows** approved for read-only display. Historical observations are loaded from Supabase PostgreSQL via Railway; display-only fictional crew names are generated by the public API. No private crew profiles are exposed.
-- **Protected** clinical endpoints, user JWTs, offline sync queue, audit trails, attachments and patient/crew-specific records are **not available** to anonymous judges. The public UI intentionally does not create measurements or acknowledge private alerts.
-- FastAPI also runs an **encrypted local SQLite** store on a Railway volume; the authorized synchronization pathway is separate from public dashboard reads. **Unattended 24/7 private cloud sync is not enabled or verified**; do not claim it is.
-- The app contains seven dashboard views and additional engineering/simulation screens, but some features are research references or UI demonstrations rather than independently accepted medical functions. A passing public JSON read does **not** prove every module, alert, or historical acceptance test has passed.
-- Use this as a **research and educational hackathon prototype**, never as a clinical decision system.
+The local Vite dev proxy forwards `/api` to FastAPI at `127.0.0.1:8000`; see [backend/README.md](backend/README.md) for the backend environment and local run commands. `VITE_DATA_MODE=demo` uses browser fixtures **instead of** database data. `VITE_DATA_MODE=api` requires an authorized API identity; it is not the public judge mode.
+
+### Automated checks
+
+~~~bash
+# From frontend/
+npm run check:scope
+npm run build
+# CI starts Vite and installs Chromium before running:
+npm run test:database-ui
+
+# From backend/
+python -m pip install -r requirements.txt
+python -m unittest discover -s tests -t .
+python -m scripts.masterdocs_scenario_report
+~~~
+
+[GitHub Actions](https://github.com/LAYMmMz/TeamRocket/actions) runs the frontend checks, frontend/API integration tests and the **local-only** scenario report. Local passes are evidence of automated code behavior—not confirmation of all cloud medical workflows.
+
+### Deployment overview
+
+**Vercel:** project [teamrocket-rocketpulse](https://vercel.com/laymmmzs-projects/teamrocket-rocketpulse), connected to `main`, framework **Vite**, root directory **`frontend`**, build `npm run build`, output `dist`. Production environment: `VITE_DATA_MODE=public`, `VITE_API_BASE_URL=/api/v1`.
+
+**Railway:** the `teamrocket-fastapi` service builds the repository's [`backend/Dockerfile`](backend/Dockerfile). The public Vercel hostname forwards `/api` via [`frontend/vercel.json`](frontend/vercel.json). Railway may use an explicitly pinned reviewed commit: after backend changes, redeploy the intended commit and verify `/api/health` before calling a release complete.
+
+**Supabase:** `TeamRocketV2Database` stores PostgreSQL cloud tables and isolated public synthetic data under row-level security. Keep secrets/JWTs and any privileged database keys **server-side only**. Do not place `service_role` or private tokens in `VITE_*` variables. The [published schema snapshot procedure](docs/LIVE_SUPABASE_DATA_TABLES.md) is operator-refreshed; it is not a real-time inspector of protected clinical rows.
+
+### Quick verification URLs
+
+- [Production frontend](https://teamrocket-rocketpulse.vercel.app/command)
+- [Backend health through Vercel](https://teamrocket-rocketpulse.vercel.app/api/health)
+- [Synthetic command API](https://teamrocket-rocketpulse.vercel.app/api/v1/public/missions/DEMO-01/command?astronaut_id=CREW-01)
+- [Approved 57-table schema API](https://teamrocket-rocketpulse.vercel.app/api/v1/public/schema/catalog)
+- [Read-only Data Tables page](https://teamrocket-rocketpulse.vercel.app/data-model)
+
+For an unauthorized visitor, a protected clinical endpoint should deny access (401/403). Do **not** submit sensitive medical information or try anonymous writes to prove connectivity.
+
+## 📚 Scope and credits
+
+**Primary project specification:** *NASA Astronaut Health Monitoring System — Final Development MasterDocs*, **15 November 2026** (team-provided, 13-page implementation source of truth). Sections 0–15 establish architecture, 12 domains, five hazards, the 57-table inventory, six SQLite tables, synthetic seed, S01–S12, seven dashboards, F01–F47, API contracts and G1–G6 acceptance.
+
+The MasterDocs references original/integrated MasterDocs, the 2026 physiology/technology update, and NASA/CSA publications as **supporting research**. Their inclusion does not mean RocketPulse has official NASA endorsement, permission to use private clinical catalogs, or approval of clinical thresholds. Any operational rule would require a documented source, revision, reviewer and approval.
+
+Built by **TeamRocket** for the **NASA Space Apps Challenge**. The published prototype uses **synthetic research data only**.
 
 ---
 
-**Team:** [TeamRocket](https://github.com/LAYMmMz/TeamRocket) · **Deployment:** [Vercel](https://vercel.com/laymmmzs-projects/teamrocket-rocketpulse) + [Railway](https://railway.com/) + [Supabase](https://supabase.com/dashboard/project/ziecxjoeljxoocixejtz) · **Data:** approved synthetic only.
+**[Launch RocketPulse](https://teamrocket-rocketpulse.vercel.app/command)** · **[Browse GitHub source](https://github.com/LAYMmMz/TeamRocket)** · **[View coverage and limitations](frontend/docs/FEATURE_MATRIX.md)**
