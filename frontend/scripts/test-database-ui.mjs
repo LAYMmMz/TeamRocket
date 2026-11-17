@@ -50,8 +50,9 @@ try{
  await page.getByText('6.25',{exact:true}).first().waitFor();
  assert(calls.some(c=>c.includes('/reports/domains/cabin')),'S04 must read cabin domain');
  assert(calls.some(c=>c.includes('/reports/domains/medicalops')),'S04 must read medicalops domain');
+ const radiationCall=page.waitForRequest(request=>request.url().includes('/reports/domains/radiation'));
  await page.getByRole('button',{name:/S07 Solar particle event/}).click();
- await page.getByText('radiation',{exact:true}).first().waitFor();
+ await radiationCall;
  await page.getByRole('button',{name:/S10 Disconnect and reconnect/}).click();
  await page.getByText(/No released database evidence is available/).waitFor();
  fail=true;await page.goto(base+'/domains/sleep');await page.getByText(/Mission data request failed: Test feed unavailable/).waitFor();
