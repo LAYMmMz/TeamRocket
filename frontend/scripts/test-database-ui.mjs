@@ -43,7 +43,18 @@ try{
  await page.goto(base+'/features/F22');await page.getByText('Connected read path',{exact:true}).waitFor();await page.getByText('6.25',{exact:true}).first().waitFor();
  assert.equal(await page.getByText('SCAFFOLD',{exact:true}).count(),0);
  await page.goto(base+'/cases');assert(await page.getByRole('button',{name:'Save simulated check-in'}).isDisabled());
+ await page.getByText('Database-linked medical operations records').waitFor();
+ await page.getByText('6.25',{exact:true}).first().waitFor();
  await page.goto(base+'/simulation');await page.getByText('Not executed',{exact:true}).waitFor();
+ await page.getByText('Related database observations').waitFor();
+ await page.getByText('6.25',{exact:true}).first().waitFor();
+ assert(calls.some(c=>c.includes('/reports/domains/cabin')),'S04 must read cabin domain');
+ assert(calls.some(c=>c.includes('/reports/domains/medicalops')),'S04 must read medicalops domain');
+ const radiationCall=page.waitForRequest(request=>request.url().includes('/reports/domains/radiation'));
+ await page.getByRole('button',{name:/S07 Solar particle event/}).click();
+ await radiationCall;
+ await page.getByRole('button',{name:/S10 Disconnect and reconnect/}).click();
+ await page.getByText(/No released database evidence is available/).waitFor();
  fail=true;await page.goto(base+'/domains/sleep');await page.getByText(/Mission data request failed: Test feed unavailable/).waitFor();
  assert.equal(await page.getByText('6.25',{exact:true}).count(),0);
  assert.equal(errors.length,0,errors.join('\n'));
