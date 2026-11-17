@@ -24,7 +24,25 @@ function readPath(path:string){return dataMode==='public'?'/public'+path:path;}
 function protectedWrite(){if(dataMode==='public')throw new Error('Read-only public dashboard. Protected operations require an authorized account.');}
 // FastAPI contracts. Public reads use only approved synthetic database records.
 // Protected writes require backend authorization; no direct browser SQLite/SQL.
+export interface PublicSchemaTable {
+ name:string;
+ table_present:boolean;
+ starter_fields_verified:boolean;
+ starter_field_count:number;
+ missing_starter_fields:string[];
+ published_synthetic_rows:number|null;
+}
+export interface PublicSchemaCatalog {
+ source:'supabase-approved-schema-snapshot';
+ inspected_at:string;
+ expected_tables:number;
+ verified_tables:number;
+ count_policy:string;
+ tables:PublicSchemaTable[];
+}
 export const api={
+ // Approved schema metadata is a separate public, read-only endpoint.
+ schemaCatalog:(signal?:AbortSignal)=>request<PublicSchemaCatalog>('/public/schema/catalog',{signal}),
  command:(missionId:string,crewId:string)=>request<CommandSnapshot>(readPath(`/missions/${encodeURIComponent(missionId)}/command?astronaut_id=${encodeURIComponent(crewId)}`)),
  trends:(crewId:string)=>request<TrendPoint[]>(readPath(`/measurements/trends?astronaut_id=${encodeURIComponent(crewId)}&hours=24`)),
  domain:(domainId:string,crewId:string,signal?:AbortSignal)=>request<CaseRecord[]>(readPath(`/reports/domains/${encodeURIComponent(domainId)}?astronaut_id=${encodeURIComponent(crewId)}`),{signal}),
