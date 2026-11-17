@@ -5,6 +5,7 @@ import spec from '../data/masterdocs.json';
 import {useMission} from '../app/MissionContext';
 import {dashboardCopy,domainLabel} from '../app/labels';
 import {DomainReadings} from '../components/DomainReadings';
+import {ClinicalEvidence} from '../components/ClinicalEvidence';
 import AstronautScene,{getCrewSuitColor} from '../components/AstronautScene';
 import type {BodyRegion} from '../components/AstronautScene';
 import {MultiChart,PulseChart} from '../components/Charts';
@@ -31,6 +32,7 @@ export function DashboardPage({viewId}:{viewId:string}){const {snapshot,trends,r
  <div className="overview-stats"><Stat label="MISSION" value={snapshotAvailable?snapshot.mission_id:'Unavailable'} detail={snapshot.mission_phase}/><Stat label="CREW RECORDS" value={snapshotAvailable?snapshot.crew.length:'Unavailable'} detail={`${sourceLabel} returned`}/><Stat label="OPEN ALERTS" value={alertStatus} detail={isDemo?'demo alert fixtures':isPublic?'not exposed by public feed':'records returned by API'}/><Stat label="CONNECTED DEVICES" value={deviceStatus} detail={isPublic?'not exposed by public feed':snapshot.devices_total>0?'reported by FastAPI':'not reported by API'}/></div>
  <div className="content-grid"><Panel title="Health readings" sub="SELECTED CREW OBSERVATIONS"><MultiChart data={trends}/><DataState time={snapshot.timestamp} quality={isDemo?"verified-demo":"unreviewed"} source={snapshot.data_source??(isDemo?'demo-fixtures':isPublic?'approved-synthetic-api':'mission-api')} value={dataLabel}/></Panel><Panel title={isDemo?'Your crew role':'Access status'} sub="FLIGHT DUTIES / CURRENT STATUS"><div className="workflow-list"><div><Users size={18}/><span>{isDemo?'Selected demo role':'Authorization'}</span><b>{isDemo?role.replaceAll('_',' '):isPublic?'Public read-only':'FastAPI enforced'}</b></div><div><Clock3 size={18}/><span>Health checks due</span><b>{examStatus}</b></div><div><BellRing size={18}/><span>Alerts to review</span><b>{reviewAlerts}</b></div><div><CloudOff size={18}/><span>Onboard data system</span><b>{isPublic?'Read-only cloud feed':'Not reported'}</b></div></div><Notice>Role selection is available only in demo mode and changes presentation, not permissions. Protected data access is authorized by FastAPI on every request.</Notice></Panel></div>
  <div className="dashboard-domains">{related.map(d=><Panel key={d.id} title={domainLabel(d.id,d.name)} sub={d.feature_ids.join(' · ')}><p className="small-description">{d.inputs}</p>{gated?<div className="locked-data">Not available in this view · mission data access is required</div>:<DomainReadings domainId={d.id}/>}<Link className="text-link bottom-link" to={`/domains/${d.id}`}>Open health area <ArrowRight size={14}/></Link></Panel>)}</div>
+ {viewId==='examinations'?<ClinicalEvidence kind="examinations"/>:viewId==='laboratory'?<ClinicalEvidence kind="laboratory"/>:null}
  <Panel title="Alert history" sub={isDemo?'DEMO RECORDS / SOURCES':isPublic?'NOT EXPOSED BY PUBLIC FEED':'MISSION API RECORDS'}><AlertPeek/></Panel>
  </main>}
 
