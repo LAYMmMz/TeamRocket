@@ -14,7 +14,13 @@ await page.route('**/api/v1/**',async route=>{
  if(second)await new Promise(resolve=>setTimeout(resolve,200));
  const timestamp='2026-11-16T10:00:00+00:00';
  const rows=[{id:crew+'-sample',label:'SLEEP_H',value:second?'8.75':'6.25',unit:'h',measured_at:timestamp,source:'SIMULATED',quality:'unreviewed',details:'Test database response',record_table:'rocketpulse_public_demo_samples',is_synthetic:true}];
- if(url.pathname.includes('/command'))await route.fulfill({json:{mission_id:'DEMO-01',mission_phase:'SYNTHETIC / PUBLIC',mission_day:0,timestamp,crew:['CREW-01','CREW-02'].map(id=>({id,crew_code:id,display_name:id,role:'simulated',status:'synthetic'})),vitals:[],alerts:[],exam_backlog:0,devices_online:0,devices_total:0,sync_state:'connected',data_source:'supabase-approved-synthetic'}});
+ if(url.pathname.endsWith('/schema/catalog'))await route.fulfill({json:{
+  source:'supabase-approved-schema-snapshot', inspected_at:timestamp,expected_tables:57,verified_tables:57,
+  count_policy:'synthetic_seed_only_no_private_record_counts',
+  tables:[{name:'vital_signs',table_present:true,starter_fields_verified:true,starter_field_count:6,
+           missing_starter_fields:[],published_synthetic_rows:8880}]
+ }});
+ else if(url.pathname.includes('/command'))await route.fulfill({json:{mission_id:'DEMO-01',mission_phase:'SYNTHETIC / PUBLIC',mission_day:0,timestamp,crew:['CREW-01','CREW-02'].map(id=>({id,crew_code:id,display_name:id,role:'simulated',status:'synthetic'})),vitals:[],alerts:[],exam_backlog:0,devices_online:0,devices_total:0,sync_state:'connected',data_source:'supabase-approved-synthetic'}});
  else if(url.pathname.includes('/trends'))await route.fulfill({json:[]});
  else if(url.pathname.endsWith('/immune'))await route.fulfill({json:[{...rows[0],label:'IMMUNE_INDEX',value:'1.0'}]});
  else await route.fulfill({json:rows});
@@ -55,7 +61,14 @@ try{
  await radiationCall;
  await page.getByRole('button',{name:/S10 Disconnect and reconnect/}).click();
  await page.getByText(/No released database evidence is available/).waitFor();
- fail=true;await page.goto(base+'/domains/sleep');await page.getByText(/Mission data request failed: Test feed unavailable/).waitFor();
+ await page.goto(base+'/data-model');
+ await page.getByText('8,880',{exact:true}).waitFor();
+ await page.getByText('VERIFIED',{exact:true}).first().waitFor();
+ assert(calls.some(c=>c.includes('/api/v1/public/schema/catalog')),'Data Tables must read approved Supabase catalog');
+ fail=true;await page.goto(base+'/data-model');
+ await page.getByText(/Supabase catalog request failed/).waitFor();
+ assert.equal(await page.getByText('8,880',{exact:true}).count(),0,'Stale catalog counts must disappear on error');
+ await page.goto(base+'/domains/sleep');await page.getByText(/Mission data request failed: Test feed unavailable/).waitFor();
  assert.equal(await page.getByText('6.25',{exact:true}).count(),0);
  assert.equal(errors.length,0,errors.join('\n'));
  assert(calls.every(c=>c.startsWith('/api/v1/public/')),'Public UI requested a private API');
