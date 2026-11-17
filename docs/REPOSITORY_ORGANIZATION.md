@@ -1,5 +1,7 @@
 # Repository consolidation record
 
+> **Current maintenance state — November 17, 2026:** This page below is a historical consolidation record, not a description of the current branch topology. The default and production branch is `main`. The archived source alternatives remain in `archive/` and are preserved because they contain unique teammate work. Obsolete fully merged branches and two completed single-file CI verification branches were deleted after exact-SHA and GitHub compare checks. The only retained non-main branch is `draft`, with nine unique unmerged commits concerning clinical evidence and its tests. Do not delete or deploy `draft` without separate review. The earlier source-branch SHAs remain in this document for historical traceability; a deleted branch does not delete commits already incorporated into `main` or archived files.
+
 ## Source branch snapshots
 
 | Branch | Original head |
