@@ -13,7 +13,7 @@ Connected project: `TeamRocketV2Database` (`ziecxjoeljxoocixejtz`).
 
 ## Verification
 
-SQL readback confirmed the count of every table above. See `supabase/queries/masterdocs_seed_preflight.sql` for a deterministic count check. A clean empty-project migration and re-seeding test, role-by-role access test, foreign key policy audit, and rerun idempotence check remain to be completed before declaring G1 passed.
+SQL readback confirmed the count of every table above. See `supabase/queries/masterdocs_seed_preflight.sql` for a deterministic count check. The clinical seed was executed **twice** and all 12 table-count checks remained unchanged and passed, establishing idempotence for this seed script in the existing project. A fresh empty-project migration/re-seed, role-by-role access test and foreign-key/policy audit remain required before declaring G1 passed.
 
 ## Still outstanding against the PDF
 
