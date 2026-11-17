@@ -232,3 +232,167 @@ def public_domain(
         "record_table": "rocketpulse_public_demo_samples",
         "is_synthetic": True,
     } for r in rows[:40]]
+
+
+# Public metadata is separately approved and does not query protected medical
+# records. Published seed counts are fixed, tagged synthetic test records only.
+CANONICAL_SCHEMA_NAMES = frozenset((
+    "alert_events",
+    "alert_evidence",
+    "alert_rules",
+    "astronauts",
+    "attachments",
+    "audit_logs",
+    "behavioral_checkins",
+    "biological_samples",
+    "bone_density_results",
+    "bone_scans",
+    "clinical_condition_catalog",
+    "clinical_sample_chain",
+    "data_import_batches",
+    "data_quality_issues",
+    "device_assignments",
+    "devices",
+    "ecg_records",
+    "environmental_lab_results",
+    "environmental_readings",
+    "environmental_samples",
+    "exercise_sessions",
+    "fitness_assessments",
+    "fluid_balance_logs",
+    "functional_assessments",
+    "gravity_transition_events",
+    "health_alerts",
+    "health_baselines",
+    "incident_events",
+    "laboratory_results",
+    "medical_exam_schedule",
+    "medical_findings",
+    "medical_incidents",
+    "medical_inventory",
+    "medical_procedures",
+    "medication_administrations",
+    "microbial_identifications",
+    "mission_crew",
+    "mission_locations",
+    "missions",
+    "nutrition_logs",
+    "ocular_assessments",
+    "ocular_results",
+    "personal_dose_records",
+    "procedure_steps",
+    "radiation_area_records",
+    "radiation_events",
+    "recommendation_records",
+    "roles",
+    "sequencing_runs",
+    "sleep_sessions",
+    "symptom_reports",
+    "sync_queue",
+    "sync_receipts",
+    "user_role_assignments",
+    "users",
+    "vascular_ultrasound_results",
+    "vital_signs",
+))
+PUBLIC_SCHEMA_COLUMNS = (
+    "table_name,table_present,starter_fields_verified,starter_field_count,"
+    "missing_starter_fields,published_synthetic_rows,inspected_at,"
+    "approved_for_public,source_label"
+)
+
+
+@router.get("/schema/catalog")
+def public_schema_catalog(response: Response, settings=Depends(get_settings)):
+    """Read the approved, operator-refreshed 57-table metadata snapshot.
+
+    This deliberately does not query canonical clinical tables or expose
+    raw clinical record counts. All metadata comes through anon RLS.
+    """
+    url = settings.supabase_url.rstrip("/")
+    key = settings.supabase_anon_key
+    if not url.startswith("https://") or not key:
+        raise HTTPException(503, "Public schema catalog is not configured")
+    try:
+        with httpx.Client(
+            timeout=httpx.Timeout(8.0, connect=3.0),
+            follow_redirects=False,
+        ) as client:
+            upstream = client.get(
+                url + "/rest/v1/rocketpulse_public_schema_catalog",
+                params={
+                    "select": PUBLIC_SCHEMA_COLUMNS,
+                    "approved_for_public": "eq.true",
+                    "order": "table_name.asc",
+                    "limit": "100",
+                },
+                headers={"apikey": key, "Accept": "application/json"},
+            )
+        upstream.raise_for_status()
+        entries = upstream.json()
+    except (httpx.HTTPError, ValueError) as exc:
+        raise HTTPException(503, "Approved Supabase schema catalog unavailable") from exc
+
+    if not isinstance(entries, list) or len(entries) != len(CANONICAL_SCHEMA_NAMES):
+        raise HTTPException(503, "Public schema snapshot is incomplete")
+    valid = []
+    seen = set()
+    snapshot = None
+    for entry in entries:
+        if not isinstance(entry, dict):
+            raise HTTPException(503, "Invalid public schema snapshot")
+        name = entry.get("table_name")
+        if not isinstance(name, str) or name not in CANONICAL_SCHEMA_NAMES or name in seen:
+            raise HTTPException(503, "Unexpected public schema table")
+        seen.add(name)
+        if entry.get("approved_for_public") is not True or entry.get("source_label") != "verified_supabase_metadata_snapshot":
+            raise HTTPException(503, "Unapproved schema metadata")
+        if type(entry.get("table_present")) is not bool or type(entry.get("starter_fields_verified")) is not bool:
+            raise HTTPException(503, "Invalid schema status")
+        fields = entry.get("starter_field_count")
+        missing = entry.get("missing_starter_fields")
+        seeded = entry.get("published_synthetic_rows")
+        if not isinstance(fields, int) or isinstance(fields, bool) or not 1 <= fields <= 100:
+            raise HTTPException(503, "Invalid schema field count")
+        if not isinstance(missing, list) or any(
+            not isinstance(x, str) or len(x) > 70 or not x.replace("_", "").isalnum()
+            for x in missing
+        ):
+            raise HTTPException(503, "Invalid missing schema fields")
+        if seeded is not None and (
+            not isinstance(seeded, int) or isinstance(seeded, bool) or not 0 <= seeded <= 10000000
+        ):
+            raise HTTPException(503, "Invalid synthetic record count")
+        if entry["starter_fields_verified"] and (
+            not entry["table_present"] or missing
+        ):
+            raise HTTPException(503, "Inconsistent schema verification")
+        try:
+            observed = datetime.fromisoformat(entry["inspected_at"].replace("Z", "+00:00"))
+        except (KeyError, AttributeError, ValueError, TypeError) as exc:
+            raise HTTPException(503, "Invalid schema snapshot timestamp") from exc
+        if observed.tzinfo is None:
+            raise HTTPException(503, "Schema snapshot lacks timezone")
+        if snapshot is None:
+            snapshot = observed
+        elif observed != snapshot:
+            raise HTTPException(503, "Inconsistent schema snapshot timestamps")
+        valid.append({
+            "name": name,
+            "table_present": entry["table_present"],
+            "starter_fields_verified": entry["starter_fields_verified"],
+            "starter_field_count": fields,
+            "missing_starter_fields": missing,
+            "published_synthetic_rows": seeded,
+        })
+    if seen != CANONICAL_SCHEMA_NAMES:
+        raise HTTPException(503, "Missing canonical schema tables")
+    _cache(response)
+    return {
+        "source": "supabase-approved-schema-snapshot",
+        "inspected_at": snapshot.isoformat(),
+        "expected_tables": len(CANONICAL_SCHEMA_NAMES),
+        "verified_tables": sum(1 for item in valid if item["starter_fields_verified"]),
+        "tables": valid,
+        "count_policy": "synthetic_seed_only_no_private_record_counts",
+    }
